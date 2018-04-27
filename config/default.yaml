@@ -1,0 +1,22 @@
+
+service: 
+  name   : bizsol
+  group  : svc
+  host   : 819.vscode.8
+  port   : 3000
+  tenant : 'public'
+  
+depends: 
+  registry: 
+    name: registry
+    timeout: 3000
+  
+db:
+  name: test_rdb  
+
+log: 
+  options: 
+    name: bizsol
+    streams:
+      - type: file
+        path: /tmp/bizsol.log.txt

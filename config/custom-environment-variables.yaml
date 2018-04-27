@@ -1,0 +1,9 @@
+service:
+  name   : SERVICE_NAME
+  group  : SERVICE_GROUP
+  host   : SERVICE_HOST
+  port   : SERVICE_PORT
+  tenant : SERVICE_TENANT
+
+db:
+  name: DB_NAME

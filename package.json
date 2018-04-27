@@ -1,0 +1,34 @@
+{
+  "name": "bizsol",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "license": "MIT",
+  "config": {
+    "local": "@819/service-ts",
+    "node_path": "./:./dist:./node_modules/@819/service-ts/dist"
+  },
+  "dependencies": {},
+  "scripts": {
+    "test:one": "yarn build && NODE_PATH='./gen/main:.' && mocha --exit ",
+    "test": "yarn build &&  NODE_PATH='./gen/main:.' && mocha  --exit ./gen/test/**/*.test.js",
+    "riot": "rm -f ./gen/src/main/shared/tags/index.js && riot ./src/main/shared/tags/. ./gen/src/main/shared/tags/index.js",
+    "scss": "yarn preassets && node-sass --include-path node_modules ./src/main/frontend/scss/* > ./dist/www/css/bundle.css",
+    "dist:folders": "mkdir -p ./dist/www/css ./dist/www/js ./dist/www/img ./dist/shared",
+    "preassets": "yarn dist:folders",
+    "assets": "cp -rL ./src/assets/* ./dist/www/.",
+    "tsc": "tsc -p tsconfig.backend.json -d",
+    "view": "mkdir -p ./dist/backend/view/ && cp -rL ./src/main/backend/view/* ./dist/backend/view/.",
+    "build": "yarn assets && yarn riot && yarn scss && yarn tsc && yarn webpack && yarn view",
+    "dist:backend": "yarn dist:folders && cp -rL gen/src/main/backend dist/.",
+    "dist:shared": "cp -rL src/main/shared/tags dist/shared/. && cp -rL gen/src/main/shared/routes dist/shared/.",
+    "dist": "yarn build &&  yarn dist:backend && yarn dist:shared",
+    "clean": "rm -rf dist && rm -rf gen",
+    "clean:build": "yarn clean && yarn build",
+    "webpack": "yarn preassets && webpack",
+    "node:path": "export NODE_PATH='./:./dist:./node_modules:./node_modules/@819/service-ts/node_modules:./node_modules/@819/service-ts/dist'",
+    "dev": "yarn dist && echo $npm_package_config_node_path && NODE_PATH=$npm_package_config_node_path && node dist/backend/main.js"
+  },
+  "devDependencies": {
+    "@types/node": "^9.6.6"
+  }
+}

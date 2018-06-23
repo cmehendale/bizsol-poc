@@ -46,7 +46,9 @@
     "webpack": "yarn preassets && webpack",
     "node:path": "export NODE_PATH='./:./dist:./node_modules:./node_modules/@819/service-ts/node_modules:./node_modules/@819/service-ts/dist'",
     "dev": "echo $npm_package_config_node_path && export NODE_PATH=$npm_package_config_node_path && echo $NODE_PATH && node dist/backend/main.js",
-    "dist:dev": "yarn dist && yarn dev"
+    "dist:dev": "yarn dist && yarn dev",
+    "dist:clean:db": "rm bizsol.db && touch bizsol.db",
+    "dist:clean:start": "yarn dist:clean:db && yarn dist:dev"
   },
   "devDependencies": {
     "@types/fs-extra": "^5.0.2",

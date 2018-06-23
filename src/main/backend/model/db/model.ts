@@ -10,4 +10,8 @@ export default class Model {
     ID():any {
         return (this as any)[(this.constructor as any).ID_FIELD]
     }
+
+    get IDVAL(): any {
+        return this.ID()
+    }
 }

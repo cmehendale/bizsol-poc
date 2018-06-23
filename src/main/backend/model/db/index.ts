@@ -37,19 +37,19 @@ export class DB {
 	}
 
 	get CUSTOMER(): Entity<Customer> {
-		return new Entity<Customer>(this.db.get(CUSTOMER), Customer) 
+		return new Entity<Customer>(this.db, this.db.get(CUSTOMER), Customer) 
 	}
 
 	get ORDER_ITEM(): Entity<OrderItem> {
-		return new Entity<OrderItem>(this.db.get(ORDER_ITEM), OrderItem);
+		return new Entity<OrderItem>(this.db, this.db.get(ORDER_ITEM), OrderItem);
 	}
 
 	get PRODUCT(): Entity<Product> {
-		return new Entity<Product>(this.db.get(PRODUCT), Product);
+		return new Entity<Product>(this.db, this.db.get(PRODUCT), Product);
 	}
 
 	get SCHEME(): Entity<Scheme> {
-		return new Entity<Scheme>(this.db.get(SCHEME), Scheme);
+		return new Entity<Scheme>(this.db, this.db.get(SCHEME), Scheme);
 	}
 	
 }
@@ -58,20 +58,19 @@ export type ConstType<T> = new (...args: any[]) => T
 
 export class Entity<T extends Model> {
 	
-	
-
 	get ID_FIELD() {
 		return (this.marshaller as any).ID_FIELD
 	}
 
-	constructor(protected db:any, private marshaller: ConstType<T>) {}
+	constructor(protected _db: any, protected db:any, private marshaller: ConstType<T>) {}
 
 
 	async load(data:any) {		
-		for (let ii = 0; ii < data.length; ii++) {
-			const cc = new this.marshaller(data[ii])
-			await this.add(cc)
-		}
+		return await this.add_all(data.map((d:any) => new this.marshaller(d)))
+		// for (let ii = 0; ii < data.length; ii++) {
+		// 	const cc = new this.marshaller(data[ii])
+		// 	await this.add(cc)
+		// }
 	}
 
 	buildFilter(IDS:string[], obj:any) {
@@ -118,6 +117,38 @@ export class Entity<T extends Model> {
 			   (await this.db.push(obj).write())
 	}
 
+	async add_all(objs: any[]): Promise<T[]> {
+
+		const IDS = this.ID_FIELD.split(',')
+
+		// console.log("DB", this.db)
+
+		const existing  = await this.find_all();
+		const diff      = await this._db._.differenceWith(objs, existing, (o1:any, o2:any) => {
+			return  !(IDS.find((key: any) => o1[key] !== o2[key]))
+
+			// for (let ii = 0, key = IDS[ii]; ii < IDS.length; ii++) {				
+			// 	if (o1.hasOwnProperty(key)) {
+			// 		const found = o1[key] === o2[key]
+			// 		if (!found) return found 
+			// 	}
+			// }
+			// return true
+		});
+
+		// if (diff && diff.length > 0) {
+		// 	for (let ii = 0; ii < diff.length; ii++) {
+		await this.db.push(...diff).write()
+		// 	}
+		// }
+
+		return diff
+
+
+		// return (await this.exists(obj)) || 
+		// 	   (await this.db.push(obj).write())
+	}
+	
 }
 
 

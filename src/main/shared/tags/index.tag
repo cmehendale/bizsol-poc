@@ -156,9 +156,8 @@
 
 	onMount() {
 		if (!opts.app) return
-
+		console.log("IN MOUNT")
 		this.app = opts.app
-		console.log("has Moment" - this.app.moment())
 		this.fetchDistributorList()
 		this.fetchItemList()
 	}
@@ -188,7 +187,8 @@
 			COQTY: this.refs.qty.value,
 			LP: this.refs.rate.value,
 			TAX_SUF: this.app.moment().format('DD/MM/YY'),
-			Family: item.JBADR0,
+			ORDPOL: this.refs.qty.value * (item.NUMPOL || 0),
+			JBADR0: item.JBADR0,
 			amount: this.refs.qty.value * this.refs.rate.value
 		})
 		this.refs.qty.value = ''

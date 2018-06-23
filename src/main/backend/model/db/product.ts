@@ -8,6 +8,7 @@ export default class Product extends Model {
     static RATE_FIELD = 'PLIBP'
     static DESC_FIELD = 'ITDSC'
     static CODE_FIELD = 'CODE'
+    static POLES_FIELD = 'NUMPOL'
 
     static newInstance(obj?:any) {
         return new Product(obj)           

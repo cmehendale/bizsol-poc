@@ -52,9 +52,9 @@ export class BaseMixin implements SchemeMixin {
     data.meta[key] = scheme
 
     const final = await this.outcome(data, key)
-    console.log("FINAL", final)
+    // console.log("FINAL", final)
     data.meta.outcome = await this.merge(data.meta.outcome, final)    
-    console.log("SCHEME", key, scheme.outcome)
+    // console.log("SCHEME", key, scheme.outcome)
   }
 
   async merge(dataOutcome: any, outcome: any): Promise<any> {
@@ -64,7 +64,7 @@ export class BaseMixin implements SchemeMixin {
   async process(engine: any, data: any) {
     engine.addFact(this.COUNT, {});
     engine.addFact(this.OUTCOME, data.meta.outcome || {});
-
+    
     engine.on(
       this.EMIT,
       async (params:any, almanac: any, result: any): Promise<any> => {
@@ -73,6 +73,7 @@ export class BaseMixin implements SchemeMixin {
           const ee: any = condition.event as any;
           engine.emit(ee.type, ee.params, almanac, result);
         }
+        console.log("IN EMIT", params, "event", condition.event);
       }
     );
 
@@ -80,12 +81,21 @@ export class BaseMixin implements SchemeMixin {
     return new Promise((resolve, reject) => {
       engine.on(
           this.DONE,
-          async (params:any, almanac: any, result: any): Promise<any> => {
-            resolve(this.done(data, params, almanac, result))
+          async (params:any, almanac: any, result: any): Promise<any> => {            
+            console.log("IN DONE", params, result);
+            try {
+              const rr = await this.done(data, params, almanac, result)
+              resolve(rr)
+            } catch (all) {
+              // console.log("ERROR", all.stack)
+              reject(all)
+            }
           })
           
-          //console.log("Running with DATA", data)
-          setTimeout(()=> { engine.run(data); })   
+          // console.log("Running with DATA", data)
+          setTimeout(()=> { 
+            engine.run(data); 
+          })   
       })
   
   }
@@ -99,7 +109,7 @@ export class ResidualMixin extends BaseMixin implements SchemeMixin {
     
     const outcome = await super.outcome(data, scheme)
 
-    console.log("INPUT OUTCOME", scheme, outcome)
+    // console.log("INPUT OUTCOME", scheme, outcome)
 
     const keys: string[] = Object.keys(outcome)
     let discount  = 0
@@ -126,7 +136,7 @@ export class ResidualMixin extends BaseMixin implements SchemeMixin {
 
     data.meta[scheme].outcome = Object.assign({}, outcome)
 
-    console.log("OUTPUT OUTCOME", scheme, data.meta[scheme].outcome)
+    // console.log("OUTPUT OUTCOME", scheme, data.meta[scheme].outcome)
     return outcome
   }
 
@@ -176,7 +186,7 @@ export class PercentageToFreebiesMixin extends BaseMixin implements SchemeMixin 
       const outcome  = await super.outcome(data, scheme)
       if (!outcome) return {}
 
-      console.log("INPUT OUTCOME", scheme, outcome)
+      // console.log("INPUT OUTCOME", scheme, outcome)
 
       const cur = {
         value   : (data.order.total * outcome[outcome.key]/100),
@@ -191,7 +201,7 @@ export class PercentageToFreebiesMixin extends BaseMixin implements SchemeMixin 
       data.meta[scheme].outcome = Object.assign({}, outcome, {discount: cur})
       outcome[this.DISCOUNT] = discount
       
-      console.log("OUTPUT OUTCOME", scheme, data.meta[scheme].outcome)
+      // console.log("OUTPUT OUTCOME", scheme, data.meta[scheme].outcome)
       return outcome
     }
 
@@ -206,3 +216,26 @@ export class PercentageToFreebiesMixin extends BaseMixin implements SchemeMixin 
     
 }
 
+export class PolesToPercentageRetrospectiveMixin extends BaseMixin implements SchemeMixin {
+
+  async outcome(data:InputData, scheme: string):Promise<any> {
+
+    console.log ("POLES DATA", data)
+    const outcome  = await super.outcome(data, scheme)
+    if (!outcome) return {}
+
+    return outcome
+  }
+
+  async done(data:any, params:any, almanac: any, result: any): Promise<any> {
+    
+    console.log ("POLES IN DONE", data, result)
+
+    const condition = await this.findAndAddCondition(data, result.conditions);
+    if (condition) {
+      almanac.addRuntimeFact(this.OUTCOME, params)
+    }
+    return await super.done(data, params, almanac, result)
+  }
+  
+}

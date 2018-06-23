@@ -7,10 +7,11 @@ export default class OrderItem extends Model {
 
     static QTY_FIELD = 'COQTY'
     static RATE_FIELD = 'LP'
-    static FAMILY_FIELD = 'Family'
+    static FAMILY_FIELD = 'JBADR0'
     static CODE_FIELD   = 'ITEM'
     static CUST_FIELD   = 'ALCANB'
     static DATE_FIELD   = 'TAX_SUF'
+    static POLES_FIELD  = 'ORDPOL'
 
     constructor(obj?:any) {
         super(obj)

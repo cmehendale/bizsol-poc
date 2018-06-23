@@ -7,8 +7,25 @@
     "local": "@819/service-ts",
     "node_path": "./:./dist:./node_modules/@819/service-ts/dist"
   },
-  "dependencies": {},
+  "dependencies": {
+    "fs-extra": "^6.0.1",
+    "json-rules-engine": "^2.3.0",
+    "lodash": "^4.17.10",
+    "lowdb": "^1.0.0",
+    "minimist": "^1.2.0",
+    "riot": "^3.10.1",
+    "yamljs": "^0.3.0"
+  },
   "scripts": {
+
+    "prep"       : "mkdir -p ./image/@819 && cp -r /local/npm/lib/node_modules/@819/*/ ../image/@819/.",
+    "preimage"   : "rm -rf ../image && mkdir -p ../image && cp -r . ../image/app && cp ../build/* ../image/. && npm run prep",
+    "image"      : "docker build --no-cache=true -t 819/prod/$npm_package_name:$npm_package_version --build-arg HOSTNAME=$npm_package_config_hostname --build-arg VIRTUAL_HOST=$npm_package_config_vhost ../image",
+    "deploy"     : "docker tag 819/prod/$npm_package_name:$npm_package_version 8x19.in:5000/prod/$npm_package_name:$npm_package_version",
+    "postdeploy" : "docker tag 8x19.in:5000/prod/$npm_package_name:$npm_package_version 8x19.in:5000/prod/$npm_package_name:latest",
+    "push"       : "docker push 8x19.in:5000/prod/$npm_package_name:$npm_package_version",
+    "postpush"   : "docker push 8x19.in:5000/prod/$npm_package_name:latest",
+
     "test:one": "yarn build && NODE_PATH='./gen/main:.' && mocha --exit ",
     "test": "yarn build &&  NODE_PATH='./gen/main:.' && mocha  --exit ./gen/test/**/*.test.js",
     "riot": "rm -f ./gen/src/main/shared/tags/index.js && riot ./src/main/shared/tags/. ./gen/src/main/shared/tags/index.js",
@@ -19,16 +36,22 @@
     "tsc": "tsc -p tsconfig.backend.json -d",
     "view": "mkdir -p ./dist/backend/view/ && cp -rL ./src/main/backend/view/* ./dist/backend/view/.",
     "build": "yarn assets && yarn riot && yarn scss && yarn tsc && yarn webpack && yarn view",
-    "dist:backend": "yarn dist:folders && cp -rL gen/src/main/backend dist/.",
-    "dist:shared": "cp -rL src/main/shared/tags dist/shared/. && cp -rL gen/src/main/shared/routes dist/shared/.",
-    "dist": "yarn build &&  yarn dist:backend && yarn dist:shared",
+    "dist:code": "yarn dist:folders && cp -rL gen/src/main/* dist/.",
+    "dist:tags": "cp -rL src/main/shared/tags dist/shared/.",
+    "dist:bootstrap": "cp -rL src/main/backend/bootstrap dist/backend/.",
+    "dist:db": "cp bizsol.db dist/.",
+    "dist": "yarn build &&  yarn dist:code && yarn dist:tags && yarn dist:bootstrap && yarn dist:db",
     "clean": "rm -rf dist && rm -rf gen",
     "clean:build": "yarn clean && yarn build",
     "webpack": "yarn preassets && webpack",
     "node:path": "export NODE_PATH='./:./dist:./node_modules:./node_modules/@819/service-ts/node_modules:./node_modules/@819/service-ts/dist'",
-    "dev": "yarn dist && echo $npm_package_config_node_path && NODE_PATH=$npm_package_config_node_path && node dist/backend/main.js"
+    "dev": "echo $npm_package_config_node_path && export NODE_PATH=$npm_package_config_node_path && echo $NODE_PATH && node dist/backend/main.js",
+    "dist:dev": "yarn dist && yarn dev"
   },
   "devDependencies": {
-    "@types/node": "^9.6.6"
+    "@types/fs-extra": "^5.0.2",
+    "@types/lodash": "^4.14.108",
+    "@types/node": "^9.6.6",
+    "@types/yamljs": "^0.2.30"
   }
 }

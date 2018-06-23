@@ -1,5 +1,13 @@
 import {Application, riot} from '@819/service-ts/dist/frontend'
 
-export class BizsolApplication extends Application {}
+import {BizsolService} from './service';
+
+export class BizsolApplication extends Application {
+
+    initService() {
+       return new BizsolService();
+    }
+
+}
 
 export {riot}

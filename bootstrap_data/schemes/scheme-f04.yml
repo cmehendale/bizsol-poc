@@ -1,0 +1,119 @@
+
+id: 'F-04' 
+name: 'Travel Exotica for AS'
+start: '01/03/2018' 
+end: '01/05/2018'
+
+eligibility:  
+  conditions: 
+    all:
+    - fact: 'sales'
+      operator: 'greaterThanInclusive'
+      path: 'total'
+      value: 66000
+    - any:
+      - fact: 'order'
+        path: 'families'
+        operator: 'contains'
+        value: '5210'
+      - fact: 'order'
+        path: 'families'
+        operator: 'contains'
+        value: '5211'
+  event:
+    type: 'done'
+    params: 
+      id: 'F-04'
+
+benefits:
+  - conditions:
+      any:
+      - any:
+        - fact: 'outcome'
+          path: '675501'
+          operator: 'greaterThanInclusive'
+          value: 3
+        - fact: 'residue'
+          path: 'total'
+          operator: 'lessThan'
+          value: 66000
+        event:
+          type: 'done'
+          params:
+            handler: 'freebies'
+            keys: ['675501']
+            id: 'F-04'
+
+      - fact: 'residue'
+        path: 'total'        
+        operator: 'greaterThanInclusive'
+        value: 3750000
+        event:
+          type: 'continue'
+          params:
+            id: 675501
+            value: 4500
+            count: 1
+
+      - fact: 'residue'        
+        path: 'total'        
+        operator: 'greaterThanInclusive'
+        value: 2750000
+        event:
+          type: 'continue'
+          params:
+            id: 675501
+            value: 3250
+
+      - fact: 'residue'        
+        path: 'total'        
+        operator: 'greaterThanInclusive'
+        value: 2150000
+        event:
+          type: 'continue'
+          params:
+            id: 675501
+            value: 2450
+
+      - fact: 'residue'        
+        path: 'total'        
+        operator: 'greaterThanInclusive'
+        value: 1530000
+        event:
+          type: 'continue'
+          params:
+            id: 675501
+            value: 1700
+
+      - fact: 'residue'        
+        path: 'total'        
+        operator: 'greaterThanInclusive'
+        value: 495000
+        event:
+          type: 'continue'
+          params:
+            id: 675501
+            value: 430
+          
+      - fact: 'residue'        
+        path: 'total'        
+        operator: 'greaterThanInclusive'
+        value: 170000
+        event:
+          type: 'continue'
+          params:
+            id: 675501
+            value: 125
+
+      - fact: 'residue'        
+        path: 'total'        
+        operator: 'greaterThanInclusive'
+        value: 66000
+        event:
+          type: 'continue'
+          params:
+            id: 675501
+            value: 35
+
+    event:
+      type: 'emit'

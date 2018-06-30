@@ -20,7 +20,10 @@
                     <th> Discount </th>
                 </tr>
                 <tr each="{customer in customerList}" if="{passesFilter(customer)}">
-                    <td> {customer.ALCLTX} </td>
+                    <td> 
+                        {customer.ALCLTX} <br/>
+                        {customer.families.join(',')} 
+                    </td>
                     <td> {customer.DZCTTX} </td>
                     <td> {(customer.poles || 0).toLocaleString('en-IN')} </td>
                     <td> {(customer.sale || 0).toLocaleString('en-IN')} </td>
@@ -58,9 +61,10 @@
 
     this.passesFilter = function(customer) {
         if (!this.fltr || this.fltr.trim().length <= 0) return true
-
+        
         var ok =  String((customer.ALCLTX  || '')).toLowerCase().match(this.fltr.toLowerCase()) ||
                   String((customer.DZCTTX  || '')).toLowerCase().match(this.fltr.toLowerCase()) ||
+                  (customer.families.map(f => String(f).toLowerCase()).indexOf(this.fltr.toLowerCase()) >= 0) ||
                   customer.poles >= Number(this.fltr || '0')
                   customer.sale >= Number(this.fltr || '0')
         

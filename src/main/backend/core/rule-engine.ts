@@ -1,175 +1,162 @@
-// use promise-based specifications 
-import Engine from '../model/json-rules'
-import {strategies}  from '../model/strategies'
-import {actions} from '../model/actions'
+import Engine from "../model/json-rules";
+import { strategies } from "../model/strategies";
+import { actions } from "../model/actions";
 
-import {moment} from '@819/service-ts'
-import * as _ from 'lodash'
+import { moment } from "@819/service-ts";
 
-import DB from '../model/db'
-import Scheme from '../model/db/scheme'
+import DB from "../model/db";
+import Scheme from "../model/db/scheme";
 
-const minimist = require('minimist')
-import {ResidualMixin, PercentageToFreebiesMixin} from './scheme-mixin'
-import OrderItem from 'backend/model/db/order-item';
-import {createInputData, InputData} from 'backend/model/order-data'
-import Customer from 'backend/model/db/customer';
+const minimist = require("minimist");
+// import { ResidualMixin, PercentageToFreebiesMixin } from "./scheme-mixin";
+import OrderItem from "backend/model/db/order-item";
+import { createInputData, InputData } from "backend/model/order-data";
+import Customer from "backend/model/db/customer";
 
-import * as mixins from 'backend/core/scheme-mixin'
+import * as handlers from "./scheme-handlers";
+import { matchedCondition, safeFact } from "backend/core/event-util";
 
-//import {safeFact, CustomEventType, CustomEventMap} from './event-util'
+enum EVENTS {
+  EMIT = "emit",
+  DONE = "done",
+  CONTINUE = "continue"
+}
+
+enum FACTS {
+  OUTCOME = "outcome",
+  SALES = "sales",
+  ORDER = "order",
+  POLES = "poles",
+  TOTAL = "total",
+  RESIDUE = "residue"
+}
 
 export class RuleEngine {
+  constructor() {}
 
-	constructor() {}
+  async findEligibleSchemes(data: InputData): Promise<Scheme[]> {
+    const schemeList: Scheme[] = await DB.SCHEME.find_all();
+    const schemeMap: any = schemeList.reduce((map: any, s: Scheme): any => {
+      map[s.id] = s;
+      return map;
+    }, {});
 
-	async eligible(data:InputData):Promise<Scheme[]> {
+    const engine = Engine();
+    const rules: Promise<any>[] = schemeList.map(s => 
+      engine.addRule(s.eligibility)
+    );
+    await Promise.all(rules);
 
-		const schemes: Scheme[] = await DB.SCHEME.find_all()
+    const result = await engine.run(data);
+    return result
+      .filter((e: any) => e.type == "done")
+      .map((e: any) => schemeMap[e.params.id]);
+  }
 
-		const schemeMap:any = _.reduce(schemes, 
-			(map:any, s:Scheme): any => { map[s.id] = s; return map }, {})
+  async calculateBenefits(data: InputData, eligible: Scheme[]): Promise<any> {
+    const onEmit = (engine: any, data: InputData) => {
+      return async (params: any, almanac: any, result: any) => {
+        const condition: any = await matchedCondition(result.conditions);
+        const outcome: any = await safeFact(almanac, FACTS.OUTCOME, {});
+        outcome.conditions = outcome.conditions || [];
 
-		const ruleEngine = Engine()
+        if (condition) {
+          outcome.conditions.push(condition);
+          almanac.addRuntimeFact(FACTS.OUTCOME, outcome);
+          if (condition.event) {
+            const ee: any = condition.event as any;
+            ee.params.condition = condition;
+            engine.emit(ee.type, ee.params, almanac, result);
+          }
+        }
+      };
+    };
 
-		for (let ii=0; ii < schemes.length; ii++) { 
-			//console.log("ADDING", schemes[ii].id, schemes[ii].eligibility)
-			await ruleEngine.addRule( schemes[ii].eligibility ) 
-		}
+    const onContinue = (engine: any, data: InputData) => {
+      return async (params: any, almanac: any, result: any) => {
+        const outcome: any = await safeFact(almanac, FACTS.OUTCOME, {});
+        const outcomeForId = outcome[params.id] || {};
 
-		const result = await ruleEngine.run(data)
-		//console.log("Result", result)
+        outcome[params.id] = {
+          value: (outcomeForId.value || 0) + params.value,
+          count: (outcomeForId.count || 0) + (params.count || 0)
+        };
 
-		return result.filter((e:any) => e.type == 'done').map((e:any) => schemeMap[e.params.id])
-	}
+        const residue: any = await safeFact(almanac, FACTS.RESIDUE, {})
+        residue.total = (residue.total || 0) - (params.condition.value || 0)
+        residue.poles = (residue.poles || 0) - (params.condition.poles || 0)
+        residue.qty   = (residue.qty || 0)   - (params.condition.qty   || 0)
 
-	async benefits(data:InputData, eligible:Scheme[]):Promise<any> {
-		
-		for (let ii=0; ii < eligible.length; ii++) {
-			let engine = Engine()
-			for (let jj=0; jj < eligible[ii].benefits.length ; jj++) { 
-				await engine.addRule( eligible[ii].benefits[jj] ) 
-			}			
-			const mixin = (mixins as any)[eligible[ii].type]
-			if (mixin) {
-				const mixinInstance = new mixin()
-				await mixinInstance.process(engine, data) //engine.run(data)
-			}
-		}
+        setTimeout(async () => {
+          engine.addFact(FACTS.OUTCOME, outcome)
+          engine.addFact(FACTS.RESIDUE, residue)
+          await engine.run(data);
+        });
+      };
+    };
 
-		return data.meta
-	}
+    const onDone = (
+      engine: any,
+      data: InputData,
+      resolve: Function,
+      reject: Function
+    ) => {
+      return async (params: any, almanac: any, result: any) => {
+        try {
+          const handler = (handlers as any)[params.handler];
+          let outcome: any = await safeFact(almanac, FACTS.OUTCOME, {});
 
-	async output(data:any, benefits:any[]):Promise<any> {
-		// const strategyName = data.strategy || 'max'
-		// const strategy:(a:any[], path:string)=>any = strategies[strategyName]
-		// if (!strategy) throw new Error(`Unknown Strategy - available strategies -- ${Object.keys(strategies)}`)
+          if (handler)
+            outcome = await handler(engine, data)(outcome, params);
+          
+          const scheme: any = await DB.SCHEME.find(Scheme.ID_FIELD, params.id)
+          scheme.outcome = outcome
+          resolve(scheme);
+        } catch (a) {
+          reject(a);
+        }
+      };
+    };
 
-		// const strategyValue = strategy(benefits, 'value');
-		// const schemeMeta  = await schemeDB.find_all(_.map(strategyValue.meta, (mm) => { return mm.params.id })) 
-		// strategyValue.meta = schemeMeta;
-		// return { name: strategyName, value: strategyValue }
+    const calcBenefits = async (scheme: Scheme): Promise<any> => {
+      const engine = Engine();
+      const rules = scheme.benefits.map((b: any) => engine.addRule(b));
+      await Promise.all(rules);
 
-	}
+      engine.on(EVENTS.EMIT, onEmit(engine, data));
+      engine.on(EVENTS.CONTINUE, onContinue(engine, data));
 
-	async execute(customer: Customer, orderItems:OrderItem[]) {
-	
-		// // data = {
-		// // 	order    : {},
-		// // 	sales    : {},
-		// // 	residual : {}
-		// // }
+      return new Promise((resolve, reject) => {
+        engine.on(EVENTS.DONE, onDone(engine, data, resolve, reject));
+        engine.addFact(FACTS.OUTCOME, {});
+        engine.addFact(FACTS.RESIDUE, Object.assign({}, data.sales))
+        engine.run(data);
+      });
+    };
 
-		// const engine  = Engine()
-		// const schemes = await DB.SCHEME.find_all()
-		
-		// for (let ii = 0; ii < schemes.length ; ii++) {
-		// 	for (let jj = 0; jj < schemes[ii].benefits.length; jj++) {
-		// 		engine.addRule(schemes[ii].benefits[jj])
-		// 	}
-		// }
+    const benefits: Promise<any>[] = eligible.map(calcBenefits);
+    return await Promise.all(benefits);
+  }
 
-		// addFactFn(RESIDUE)		
+  async createInputData(customer: Customer, orderItems: OrderItem[]) {
+    const filtr = (item: any) => {
+      return item[OrderItem.CUST_FIELD] == (customer as any)[Customer.ID_FIELD];
+    };
 
-		// engine.addFact('residue', async (params:any, almanac:any, options:any = { cache: false})=> {
-		// 	return await safeFact(almanac, 'sales', null)
-		// })
+    const salesItems = await DB.ORDER_ITEM.find_all(filtr);
+    return await createInputData(orderItems, salesItems);
+  }
 
-		// engine.addFact('count', async (params:any, almanac:any, options:any = { cache: false})=> {
-		// 	const count:any = await safeFact(almanac, 'ccnt', {})
-		// 	if (params.id) count[params.id] = count[params.id] || 0
-		// 	return count
-		// })
+  async execute(customer: Customer, orderItems: OrderItem[]) {
+    const inputData = await this.createInputData(customer, orderItems);
+    console.log("Input", inputData.sales, inputData.order);
 
-		// engine.on('done', async (event:string, almanac:any, result:any)=> {
-		// 	let outcome = await safeFact(almanac, 'outcome', 0)
-		// 	console.log("OUTCOME IN DONE", outcome)
-		// })
-
-		// engine.on('emit_event', async (event:string, almanac:any, result:any)=> {
-
-		// 	const condition: any = await this.findMatchedCondition(result.conditions)
-		// 	if (condition.event) {
-		// 		const ee: any = condition.event as any
-		// 		engine.emit(ee.type, ee.params, almanac, result)
-		// 	}
-		// })
-
-
-		// engine.on('residue', async (event:string, almanac:any, result:any) => {
-
-		// 	const condition = await this.findMatchedCondition(result.conditions)
-		// 	const value = condition.value 
-			
-		// 	const sales = await almanac.factValue('residue')
-		// 	const residue = sales - value
-
-		// 	let outcome = await this.safeFact(almanac, 'outcome', 0)
-		// 	outcome += condition.outcome
-
-		// 	let count:any = await this.safeFact(almanac, 'count', {})
-		// 	if (condition.count) count[condition.id || 'default'] = (count[condition.id  || 'default'] || 0) + (condition.count || 0)
-		// 	console.log("OUTCOME", outcome, "COUNT", count, "RESIDUE", residue)
-
-		// 	// if (condition.max_count && count[condition.id] >= condition.max_count) 
-		// 	// 	return	
-
-		// 	setTimeout(async () => {
-		// 		console.log("RUNNING AGAIN")
-		// 		await engine.addFact('residue', residue)
-		// 		await engine.addFact('outcome', outcome)
-		// 		await engine.addFact('count',   count)
-		// 		await engine.run(data)
-		// 	})
-		// })
-
-		// engine.on('success', (event:string, almanac:any, result:any) => {
-		// 	//console.log("SUCCESS", event, result)
-		// })
-
-		// engine.on(CustomEventType.EMIT_EVENT, CustomEventMap.EMIT_EVENT(engine))
-		// engine.on(CustomEventType.LOOP_RESIDUAL, CustomEventMap.LOOP_RESIDUAL(engine, data, "residue"))
-		// await engine.run(data)
-
-		// const scheme = new PercentageToFreebiesMixin()
-		// await scheme.process(engine, data)
-		// await engine.run(data)
-		// console.log("RESULT", await scheme.outcome)
-
-		// const eligible:Scheme[] = await this.eligibleSchemes(data)
-		// const benefits:any[]    = await this.schemeBenefits(eligible, data)
-
-		// return await this.output(data, benefits)
-
-
-		const salesItems = await DB.ORDER_ITEM.find_all((item:any) => { return item[OrderItem.CUST_FIELD] == (customer as any)[Customer.ID_FIELD]})
-		const inputData  = await createInputData(orderItems, salesItems);
-
-		const eligible   = await this.eligible(inputData)
-		return await this.benefits(inputData, eligible)
-		
-	}
-
+    const eligibleSchemes = await this.findEligibleSchemes(inputData);
+    console.log("Eligible", eligibleSchemes);
+    const benefits = await this.calculateBenefits(inputData, eligibleSchemes);
+    //console.log("BENEFITS", benefits)
+    return benefits
+  }
 }
 
 // (async()=> {

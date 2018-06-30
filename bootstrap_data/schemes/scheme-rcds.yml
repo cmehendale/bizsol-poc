@@ -1,0 +1,123 @@
+
+id: 'RCDs' 
+name: 'Take Off With RCDs'
+start: '01/03/2018' 
+end: '01/05/2018'
+
+eligibility:  
+  conditions: 
+    all:
+    - fact: 'sales'
+      operator: 'greaterThanInclusive'
+      path: 'combo.193,235,237.poles'
+      value: 0
+    - any:
+      - fact: 'order'
+        path: 'families'
+        operator: 'contains'
+        value: '193'
+      - fact: 'order'
+        path: 'families'
+        operator: 'contains'
+        value: '235'
+      - fact: 'order'
+        path: 'families'
+        operator: 'contains'
+        value: '237'
+  event:
+    type: 'done'
+    params: 
+      id: 'RCDs'
+
+benefits:
+  - conditions:
+      any:
+      - all:
+        - fact: 'sales'
+          path: 'combo.193,235,237.poles'
+          operator: 'lessThanInclusive'
+          value: 49
+        event:
+          type: 'done'
+          params:
+            id: 'RCDs'
+            handler: 'percentage'
+            value: 0
+        
+      - all:
+        - fact: 'sales'
+          path: 'combo.193,235,237.poles'
+          operator: 'greaterThanInclusive'
+          value: 50
+        - fact: 'sales'
+          path: 'combo.193,235,237.poles'
+          operator: 'lessThanInclusive'
+          value: 200
+        event:
+          type: 'done'
+          params:
+            id: 'RCDs'
+            handler: 'percentage'
+            value: 7
+
+      - all:
+        - fact: 'sales'
+          path: 'combo.193,235,237.poles'
+          operator: 'greaterThanInclusive'
+          value: 201
+        - fact: 'sales'
+          path: 'combo.193,235,237.poles'
+          operator: 'lessThanInclusive'
+          value: 500
+        event:
+          type: 'done'
+          params:
+            id: 'RCDs'
+            handler: 'percentage'
+            value: 9
+
+      - all:
+        - fact: 'sales'
+          path: 'combo.193,235,237.poles'
+          operator: 'greaterThanInclusive'
+          value: 501
+        - fact: 'sales'
+          path: 'combo.193,235,237.poles'
+          operator: 'lessThanInclusive'
+          value: 1000
+        event:
+          type: 'done'
+          params:
+            id: 'RCDs'
+            handler: 'percentage'
+            value: 12
+
+      - all:
+        - fact: 'sales'
+          path: 'combo.193,235,237.poles'
+          operator: 'greaterThanInclusive'
+          value: 1001
+        - fact: 'sales'
+          path: 'combo.193,235,237.poles'
+          operator: 'lessThanInclusive'
+          value: 1800
+        event:
+          type: 'done'
+          params:
+            id: 'RCDs'
+            handler: 'percentage'
+            value: 15
+
+      - fact: 'sales'
+        path: 'combo.193,235,237.poles'
+        operator: 'greaterThanInclusive'
+        value: 1801
+      event:
+        type: 'done'
+        params:
+          id: 'RCDs'
+          handler: 'percentage'
+          value: 18
+
+    event:
+      type: 'emit'

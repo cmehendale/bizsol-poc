@@ -1,0 +1,44 @@
+
+id: 'F11-May' 
+name: 'Booster for May'
+start: '01/03/2018' 
+end: '01/05/2018'
+
+eligibility:  
+  conditions: 
+    all:      
+    - fact: 'sales'
+      path: 'month.Apr.total'
+      operator: 'greaterThanInclusive'
+      value: 5000
+    - any:
+      - fact: 'order'
+        path: 'families'
+        operator: 'contains'
+        value: '5210'
+      - fact: 'order'
+        path: 'families'
+        operator: 'contains'
+        value: '5211'
+  event:
+    type: 'done'
+    params:
+      id: 'F11-May'
+
+benefits:
+  - conditions:
+      any:
+      - fact: 'sales'
+        path: 'total'
+        operator: 'greaterThanInclusive'
+        value: 5000
+        event:
+          type: 'done'
+          params:           
+            id: 'F11-May'
+            handler: 'discount'
+            key: 'Apr'
+            Apr: 2
+
+    event:
+      type: 'emit'

@@ -1,0 +1,44 @@
+
+id: 'F11-Apr' 
+name: 'Booster for Apr'
+start: '01/03/2018' 
+end: '01/05/2018'
+
+eligibility:  
+  conditions: 
+    all:      
+    - fact: 'sales'
+      operator: 'greaterThanInclusive'
+      path: 'month.Mar.total'
+      value: 66000
+    - any:
+      - fact: 'order'
+        path: 'families'
+        operator: 'contains'
+        value: '5210'
+      - fact: 'order'
+        path: 'families'
+        operator: 'contains'
+        value: '5211'      
+  event:
+    type: 'done'
+    params:
+      id: 'F11-Apr'
+
+benefits:
+  - conditions:
+      any:
+      - fact: 'sales'
+        path: 'total'
+        operator: 'greaterThanInclusive'
+        value: 66000
+        event:
+          type: 'done'
+          params: 
+            id: 'F11-Apr'
+            handler: 'discount'
+            key: 'Mar'
+            Mar: 3
+
+    event:
+      type: 'emit'

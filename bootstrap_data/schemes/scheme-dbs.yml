@@ -1,0 +1,135 @@
+
+id: 'DBs' 
+name: 'Take Off With DBs'
+start: '01/03/2018' 
+end: '01/05/2018'
+
+eligibility:  
+  conditions: 
+    all:
+    - fact: 'sales'
+      operator: 'greaterThanInclusive'
+      path: 'total'
+      value: 0
+    - any:
+      - fact: 'order'
+        path: 'families'
+        operator: 'contains'
+        value: '7001'
+      - fact: 'order'
+        path: 'families'
+        operator: 'contains'
+        value: '7002'
+      - fact: 'order'
+        path: 'families'
+        operator: 'contains'
+        value: '7016'
+      - fact: 'order'
+        path: 'families'
+        operator: 'contains'
+        value: '7018'
+      - fact: 'order'
+        path: 'families'
+        operator: 'contains'
+        value: '7021'
+      - fact: 'order'
+        path: 'families'
+        operator: 'contains'
+        value: '7022'
+  event:
+    type: 'done'
+    params: 
+      id: 'DBs'
+
+benefits:
+  - conditions:
+      any:
+      - all:
+        - fact: 'sales'
+          path: 'total'
+          operator: 'lessThanInclusive'
+          value: 200000
+        event:
+          type: 'done'
+          params:
+            id: 'DBs'
+            handler: 'percentage'
+            value: 0
+        
+      - all:
+        - fact: 'sales'
+          path: 'total'
+          operator: 'greaterThan'
+          value: 200000
+        - fact: 'sales'
+          path: 'total'
+          operator: 'lessThanInclusive'
+          value: 500000
+        event:
+          type: 'done'
+          params:
+            id: 'DBs'
+            handler: 'percentage'
+            value: 7.5
+
+      - all:
+        - fact: 'sales'
+          path: 'total'
+          operator: 'greaterThan'
+          value: 500000
+        - fact: 'sales'
+          path: 'total'
+          operator: 'lessThanInclusive'
+          value: 1100000
+        event:
+          type: 'done'
+          params:
+            id: 'DBs'
+            handler: 'percentage'
+            value: 11
+
+      - all:
+        - fact: 'sales'
+          path: 'total'
+          operator: 'greaterThan'
+          value: 1100000
+        - fact: 'sales'
+          path: 'total'
+          operator: 'lessThanInclusive'
+          value: 1600000
+        event:
+          type: 'done'
+          params:
+            id: 'DBs'
+            handler: 'percentage'
+            value: 14
+
+      - all:
+        - fact: 'sales'
+          path: 'total'
+          operator: 'greaterThan'
+          value: 1600000
+        - fact: 'sales'
+          path: 'total'
+          operator: 'lessThanInclusive'
+          value: 2100000
+        event:
+          type: 'done'
+          params:
+            id: 'DBs'
+            handler: 'percentage'
+            value: 16
+
+      - fact: 'sales'
+        path: 'total'
+        operator: 'greaterThan'
+        value: 2100000
+      event:
+        type: 'done'
+        params:
+          id: 'DBs'
+          handler: 'percentage'
+          value: 19
+
+    event:
+      type: 'emit'

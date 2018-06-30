@@ -76,7 +76,7 @@ export async function createInputData(
   };
 
   const postProcessForFamilyCombo = (data: ItemData): ItemData => {
-    
+
     const families = data.families.sort()
     const pSet = powerset(families)
     for (let ii = 0; ii < pSet.length; ii++) {

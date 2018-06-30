@@ -104,7 +104,7 @@
 							<th>
 								Scheme Applicable
 							</th>
-							<th colspan="3">
+							<th colspan="3" class="has-text-centered is-size-5">
 								Benefit
 							</th>
 						</tr>
@@ -114,16 +114,16 @@
 							<th>
 								Free Items
 							</th>
-							<th>
+							<th class="has-text-right">
 								Discount Value
 							</th>
-							<th>
+							<th class="has-text-right">
 								Discount Percent
 							</th>
 						</tr>
 						<tr each="{scheme in schemes}">
 							<td>
-								{scheme.meta.name}
+								{scheme.name}
 							</td>
 							<td>
 								<ul if="{scheme.outcome.items}">
@@ -133,25 +133,25 @@
 									</li>
 								</ul>
 							</td>
-							<td>
-								{scheme.outcome.discount.value.toLocaleString()}
+							<td class="has-text-right">
+								{scheme.outcome.discount.value.toLocaleString('en-IN')}
 							</td>
-							<th>
-								{scheme.outcome.discount.percent.toLocaleString()}%
+							<th class="has-text-right">
+								{scheme.outcome.discount.percent.toLocaleString('en-IN')}%
 							</th>
 						</tr>
 						<tr>
 							<td colspan="4"></td>
 						</tr>
-						<tr class="is-text-info">
+						<tr if="{outcome}" class="is-text-info">
 							<th colspan="2">
-								<span class="is-size-5 has-text-info">Total Order</span>
+								<span class="is-size-5 has-text-info">Total Benefit</span>
 							</th>
-							<th>
-								<span class="is-size-5 has-text-info">{outcome.discount.value.toLocaleString()}</span>
+							<th class="has-text-right">
+								<span class="is-size-5 has-text-info">{outcome.discount.value.toLocaleString('en-IN')}</span>
 							</th>
-							<th>
-								<span class="is-size-5 has-text-info">{outcome.discount.percent.toLocaleString()}%</span> 
+							<th class="has-text-right">
+								<span class="is-size-5 has-text-info">{outcome.discount.percent.toLocaleString('en-IN')}%</span> 
 							</th>
 						</tr>
 					</table>
@@ -258,12 +258,16 @@
 	onCalculateDiscount() {
 		this.app.data("calculate:discount", {customer: this.customer, orderList: this.orderList})
 			.then((data)=> {
-				//console.log("RESPONSE", data)
-				this.schemes = Object.keys(data)
-									 .filter((k)=> { return ['conditions', 'outcome'].indexOf(k) < 0 })
-									 .map((k)=> { return data[k] })
-				this.outcome = data.outcome
-				console.log("this.schemes", this.schemes)
+				this.schemes = data.filter((s) => s.outcome )
+				this.outcome = {
+					discount: this.schemes.reduce((o, s) => {
+											o.value   += s.outcome.discount.value
+											o.percent += s.outcome.discount.percent
+											return o
+										}, { value:0, percent:0})
+				}
+
+				console.log("this.schemes", this.schemes, this.outcome)
 				this.update()
 			})
 	}

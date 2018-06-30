@@ -59,9 +59,15 @@ export class BizsolService extends BaseService2 {
                         data.sale     += sale //(oi[OrderItem.QTY_FIELD] * oi[OrderItem.RATE_FIELD])
                         data.poles    += poles
                         data.discount += discount
+
+                        data.families = [ ...(data.families
+                                                  .filter((f:any) => f != oi[OrderItem.FAMILY_FIELD])),
+                                            oi[OrderItem.FAMILY_FIELD]
+                                        ]                                        
                     }                    
+                    //if (data.families.length > 0) console.log("FAMILY", dd.ALCLTX, data.families)
                     return data
-                }, {sale:0, poles:0, discount:0})
+                }, {sale:0, poles:0, discount:0, families:[]})
             )
             //console.log("DOO", doo)
             return doo

@@ -1,0 +1,128 @@
+id: 'MCBs' 
+name: 'Take Off With MCBs'
+start: '01/03/2018' 
+end: '01/05/2018'
+
+eligibility:  
+  conditions: 
+    all:
+    - fact: 'sales'
+      operator: 'greaterThanInclusive'
+      path: 'combo.199,203,206.poles'
+      value: 700
+    - any:
+      - fact: 'order'
+        path: 'families'
+        operator: 'contains'
+        value: '199'
+      - fact: 'order'
+        path: 'families'
+        operator: 'contains'
+        value: '203'
+      - fact: 'order'
+        path: 'families'
+        operator: 'contains'
+        value: '206'
+  event:
+    type: 'done'
+    params: 
+      id: 'MCBs'
+
+benefits:
+  - conditions:
+      any:
+      - all:
+        - fact: 'sales'
+          path: 'combo.199,203,206.poles'
+          operator: 'lessThanInclusive'
+          value: 700
+        event:
+          type: 'done'
+          params:
+            id: 'MCBs'
+            handler: 'poles'
+            key: 408582
+            value: 0
+        
+      - all:
+        - fact: 'sales'
+          path: 'combo.199,203,206.poles'
+          operator: 'greaterThanInclusive'
+          value: 700
+        - fact: 'sales'
+          path: 'combo.199,203,206.poles'
+          operator: 'lessThanInclusive'
+          value: 4500
+        event:
+          type: 'done'
+          params:
+            id: 'MCBs'
+            handler: 'poles'
+            key: 408582
+            value: 0.03
+
+      - all:
+        - fact: 'sales'
+          path: 'combo.199,203,206.poles'
+          operator: 'greaterThanInclusive'
+          value: 4501
+        - fact: 'sales'
+          path: 'combo.199,203,206.poles'
+          operator: 'lessThanInclusive'
+          value: 8000
+        event:
+          type: 'done'
+          params:
+            id: 'MCBs'
+            handler: 'poles'
+            key: 408582
+            value: 0.04
+
+      - all:
+        - fact: 'sales'
+          path: 'combo.199,203,206.poles'
+          operator: 'greaterThanInclusive'
+          value: 8001
+        - fact: 'sales'
+          path: 'combo.199,203,206.poles'
+          operator: 'lessThanInclusive'
+          value: 12000
+        event:
+          type: 'done'
+          params:
+            id: 'MCBs'
+            handler: 'poles'
+            key: 408582
+            value: 0.06
+
+      - all:
+        - fact: 'sales'
+          path: 'combo.199,203,206.poles'
+          operator: 'greaterThanInclusive'
+          value: 12001
+        - fact: 'sales'
+          path: 'combo.199,203,206.poles'
+          operator: 'lessThanInclusive'
+          value: 18000
+        event:
+          type: 'done'
+          params:
+            id: 'MCBs'
+            handler: 'poles'
+            key: 408582
+            value: 0.07
+
+      - fact: 'sales'
+        path: 'combo.199,203,206.poles'
+        operator: 'greaterThanInclusive'
+        value: 18001
+      event:
+        type: 'done'
+        params:
+          id: 'MCBs'
+          handler: 'poles'
+          key: 408582
+          value: 0.09
+
+    event:
+      type: 'emit'

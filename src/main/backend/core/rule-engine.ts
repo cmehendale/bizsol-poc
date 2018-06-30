@@ -33,10 +33,12 @@ export class RuleEngine {
 		const ruleEngine = Engine()
 
 		for (let ii=0; ii < schemes.length; ii++) { 
+			//console.log("ADDING", schemes[ii].id, schemes[ii].eligibility)
 			await ruleEngine.addRule( schemes[ii].eligibility ) 
 		}
 
 		const result = await ruleEngine.run(data)
+		//console.log("Result", result)
 
 		return result.filter((e:any) => e.type == 'done').map((e:any) => schemeMap[e.params.id])
 	}

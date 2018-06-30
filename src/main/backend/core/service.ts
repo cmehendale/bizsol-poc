@@ -1,13 +1,14 @@
 import {BaseService2, Service2, Config, Util, express as E} from '@819/service-ts/dist/backend'
 import * as path from 'path'
 
-import {distributorDB} from '../model/distributors'
-import {schemeDB} from '../model/schemes'
+// import {customerDB} from '../model/customers'
+// import {schemeDB} from '../model/schemes'
 import {bootstrap} from '../bootstrap'
 import { RuleEngine } from 'backend/core/rule-engine';
-import OrderItem from 'backend/model/db/order-item';
 
 import DB from 'backend/model/db'
+
+import OrderItem from 'backend/model/db/order-item';
 import Customer from 'backend/model/db/customer';
 
 export class BizsolService extends BaseService2 {
@@ -31,7 +32,7 @@ export class BizsolService extends BaseService2 {
 
     initApiRoutes() {
         super.initApiRoutes()
-		this.app.get('/api/distributorList', this.wrap('/api/distributorList', this.distributorList.bind(this)))
+		this.app.get('/api/customerList', this.wrap('/api/customerList', this.customerList.bind(this)))
 		this.app.get('/api/itemList',        this.wrap('/api/itemList',        this.itemList.bind(this)))
 		this.app.post('/api/calculateDiscount',        this.wrap('/api/calculateDiscount',        this.calculateDiscount.bind(this)))
     }
@@ -44,17 +45,29 @@ export class BizsolService extends BaseService2 {
     }
 
     // API
-    async distributorList(req: E.Request, res: E.Response): Promise<any> {
+    async customerList(req: E.Request, res: E.Response): Promise<any> {
         const salesData = await DB.ORDER_ITEM.find_all()
         return await (await DB.CUSTOMER.find_all()).map((dd:any) => {
-            dd.sale = salesData.reduce(
-                (sales: number, oi:any): number => {
-                if (oi[OrderItem.CUST_FIELD] == dd[Customer.ID_FIELD]) {                    
-                    sales += oi[OrderItem.QTY_FIELD] * oi[OrderItem.RATE_FIELD]
-                }
-                return sales
-            }, 0)
-            return dd
+            let doo = Object.assign({}, dd,
+                salesData.reduce(
+                    (data:any , oi:any): any => {
+                    if (String(oi[OrderItem.CUST_FIELD]) == String(dd[Customer.ID_FIELD])) {
+                        
+                        const sale  = Number(oi[OrderItem.TOTAL_FIELD]) //Number(oi[OrderItem.QTY_FIELD]) * Number(oi[OrderItem.RATE_FIELD])
+                        const poles = Number(oi[OrderItem.POLES_FIELD])
+                        const discount = oi[OrderItem.NET_FIELD] ? (sale - Number(oi[OrderItem.NET_FIELD] || '0')): 0
+                        data.sale     += sale //(oi[OrderItem.QTY_FIELD] * oi[OrderItem.RATE_FIELD])
+                        data.poles    += poles
+                        data.discount += discount
+                    }                    
+                    return data
+                }, {sale:0, poles:0, discount:0})
+            )
+            //console.log("DOO", doo)
+            return doo
+        })
+        .filter((a: any) => {
+            return a.poles != 0 || a.sale != 0
         })
 	}
 
@@ -64,7 +77,7 @@ export class BizsolService extends BaseService2 {
 	}
 
     async calculateDiscount(req: E.Request, res: E.Response): Promise<any> {
-        return await new RuleEngine().execute(req.body.distributor, req.body.orderList.map((item:any) => new OrderItem(item)))
+        return await new RuleEngine().execute(req.body.customer, req.body.orderList.map((item:any) => new OrderItem(item)))
 	}
     
 }

@@ -38,6 +38,7 @@ export class BaseMixin implements SchemeMixin {
   async done(data:InputData, params:any, almanac: any, result: any): Promise<any> {
     
     const outcome = await almanac.factValue(this.OUTCOME)
+    console.log("ALM.OUTCOME", outcome, params)
     data.meta = data.meta || {}
     
     const key = params.id || 'Default'
@@ -52,9 +53,9 @@ export class BaseMixin implements SchemeMixin {
     data.meta[key] = scheme
 
     const final = await this.outcome(data, key)
-    // console.log("FINAL", final)
+    console.log("FINAL", final)
     data.meta.outcome = await this.merge(data.meta.outcome, final)    
-    // console.log("SCHEME", key, scheme.outcome)
+    console.log("data.meta.outcome", data.meta.outcome)
   }
 
   async merge(dataOutcome: any, outcome: any): Promise<any> {
@@ -73,7 +74,7 @@ export class BaseMixin implements SchemeMixin {
           const ee: any = condition.event as any;
           engine.emit(ee.type, ee.params, almanac, result);
         }
-        console.log("IN EMIT", params, "event", condition.event);
+        console.log("IN EMIT", condition.event);
       }
     );
 
@@ -82,7 +83,6 @@ export class BaseMixin implements SchemeMixin {
       engine.on(
           this.DONE,
           async (params:any, almanac: any, result: any): Promise<any> => {            
-            console.log("IN DONE", params, result);
             try {
               const rr = await this.done(data, params, almanac, result)
               resolve(rr)
@@ -108,8 +108,6 @@ export class ResidualMixin extends BaseMixin implements SchemeMixin {
   async outcome(data:InputData, scheme:string): Promise<any> {
     
     const outcome = await super.outcome(data, scheme)
-
-    // console.log("INPUT OUTCOME", scheme, outcome)
 
     const keys: string[] = Object.keys(outcome)
     let discount  = 0
@@ -216,26 +214,97 @@ export class PercentageToFreebiesMixin extends BaseMixin implements SchemeMixin 
     
 }
 
-export class PolesToPercentageRetrospectiveMixin extends BaseMixin implements SchemeMixin {
+export class SimplePercentageDiscount extends BaseMixin implements SchemeMixin {
 
   async outcome(data:InputData, scheme: string):Promise<any> {
 
-    console.log ("POLES DATA", data)
     const outcome  = await super.outcome(data, scheme)
     if (!outcome) return {}
 
+
+    const cur = {
+      value   : (data.order.total * outcome.value/100),
+      percent : outcome.value
+    }
+    console.log("CUR", cur)
+    const discount   = Object.assign({}, (data.meta.outcome || {}).discount || {})
+
+    discount.value   = (discount.value || 0) + cur.value
+    discount.percent = Math.round(((discount.percent || 0) + cur.percent)*100)/100
+
+    data.meta[scheme].outcome = Object.assign({}, outcome, {discount: cur})
+    outcome[this.DISCOUNT] = discount
+    
+    console.log("RETURNING OUTCOME", outcome)
     return outcome
   }
 
   async done(data:any, params:any, almanac: any, result: any): Promise<any> {
-    
-    console.log ("POLES IN DONE", data, result)
 
+    const condition = await this.findAndAddCondition(data, result.conditions);
+    almanac.addRuntimeFact(this.OUTCOME, params)
+    return await super.done(data, params, almanac, result)
+  }
+  
+}
+
+
+export class PolesToPercentageRetrospectiveMixin extends BaseMixin implements SchemeMixin {
+
+  async outcome(data:InputData, scheme: string):Promise<any> {
+
+    const outcome  = (await super.outcome(data, scheme)) || {}
+
+    const bonusOrderPoles = outcome.value * data.order.poles
+    const bonusTotalPoles = outcome.value * data.sales.poles
+
+    const p: any = await DB.PRODUCT.find(Product.ID_FIELD, outcome.item)
+    
+    if (p) {
+
+      outcome.poles      = bonusOrderPoles
+      outcome.totalPoles = bonusTotalPoles
+      
+      const orderDiscount = Number(p[Product.RATE_FIELD]) * bonusOrderPoles
+      const totalDiscount = Number(p[Product.RATE_FIELD]) * bonusTotalPoles
+
+      const netDiscount   = totalDiscount - data.order.families.reduce((d, f) => {
+        return d + ((data.sales.family[f] || {}).discount || 0)
+      }, 0) 
+      
+      //console.log("Bonus Poles", bonusTotalPoles, "OD", orderDiscount, "TD", totalDiscount, "ND", netDiscount);
+
+      outcome[this.DISCOUNT]  = {
+        value: netDiscount,
+        percent: (netDiscount * 100)/ data.order.total 
+      }
+
+      // if (outcome[this.DISCOUNT].percent >= 30) {
+      //   outcome[this.DISCOUNT].percent = 30
+      //   outcome[this.DISCOUNT].value   = data.order.total * 0.3
+      // }
+
+    }
+
+    data.meta[scheme].outcome = Object.assign({}, outcome)
+
+    console.log("RETURNING OUTCOME", outcome)
+    return outcome
+  }
+
+  async done(data:any, params:any, almanac: any, result: any): Promise<any> {
+
+    // console.log("DONE = ", data, params, result)
+    
     const condition = await this.findAndAddCondition(data, result.conditions);
     if (condition) {
       almanac.addRuntimeFact(this.OUTCOME, params)
     }
     return await super.done(data, params, almanac, result)
   }
-  
+
+  async process(engine: any, data: any):Promise<any> {
+    console.log("IN PROCESS", data)
+    return super.process(engine, data)
+  }  
 }

@@ -1,4 +1,4 @@
-// import {distributorDB} from '../model/distributors'
+// import {customerDB} from '../model/customers'
 // import {schemeDB, Scheme} from '../model/schemes'
 
 import * as _ from 'lodash'
@@ -13,11 +13,9 @@ export class Bootstrap {
 
 	async initCustomers() {
 		let data = [ 
-			...YAML.load('./bootstrap_data/customer_data.yaml'),
 		    ...YAML.load('./bootstrap_data/customer_data_1.yaml') 
 		]
 		await DB.CUSTOMER.load(data)
-
 		console.log('CUSTOMERS', (await DB.CUSTOMER.find_all()).length)
 		
 	}
@@ -66,7 +64,9 @@ export class Bootstrap {
 			YAML.load('./bootstrap_data/schemes/scheme-f04.yml'),
 			YAML.load('./bootstrap_data/schemes/scheme-f11-Apr.yml'),
 			YAML.load('./bootstrap_data/schemes/scheme-f11-May.yml'),
-			YAML.load('./bootstrap_data/schemes/scheme-mcbs.yml')
+			YAML.load('./bootstrap_data/schemes/scheme-mcbs.yml'),
+			YAML.load('./bootstrap_data/schemes/scheme-rcds.yml'),
+			YAML.load('./bootstrap_data/schemes/scheme-dbs.yml')
 		])
 		console.log('SCHEMES', (await DB.SCHEME.find_all()).length)
 		

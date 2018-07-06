@@ -2492,6 +2492,43 @@
   ORDDT2: 16/04/18
   TAX_SUF: 901
   ORDREF: F08-TAKE_DBS
+  DISCOUNT: 25
+  DISRT: 35
+  ITEM: 408585
+  ORDQTY: 800
+  ORDPOL: 800
+  field20: 14
+  ORDLP: 310400
+  ORDNET: 310400
+  SALMON: ""
+  SALQTY: 0
+  SALPOL: 0
+  SALLP: 0
+  SALNET: 0
+  Inv: {' Date': 00/00/00}
+  LP: 388
+  Rate_policy: 1170
+  Policy_Amt: 310400
+  Scheme_Amt: 310400
+  Schemeflag: Y
+  Mechcacc: N
+  Type: 'MCBs'
+  SPMP: ""
+-
+  TERRN: 3
+  DZCTTX: WEST
+  ALBYCD: GJ
+  ALBKCD: GJ
+  HOUSE: 1
+  ALCANB: 40047803
+  ALCLTX: 'ANIKA ENTERPRISE'
+  ALCPTX: AHMEDABAD
+  CUPPB: PBKAD
+  TRNPBK: PBKAD
+  FLCVNB: 1197751
+  ORDDT2: 16/04/18
+  TAX_SUF: 901
+  ORDREF: F08-TAKE_DBS
   DISCOUNT: 43.06
   DISRT: 35
   ITEM: 402508
@@ -3620,6 +3657,43 @@
   Rate_policy: 1883.7
   Policy_Amt: 7534.8
   Scheme_Amt: 7535
+  Schemeflag: Y
+  Mechcacc: N
+  Type: 'DB''S'
+  SPMP: ""
+-
+  TERRN: 3
+  DZCTTX: WEST
+  ALBYCD: GJ
+  ALBKCD: GJ
+  HOUSE: 1
+  ALCANB: 40001603
+  ALCLTX: 'ASHWIN ELECTRICALS'
+  ALCPTX: AHMEDABAD
+  CUPPB: PBKAD
+  TRNPBK: PBKAD
+  FLCVNB: 1199371
+  ORDDT2: 19/04/18
+  TAX_SUF: 901
+  ORDREF: F08-TAKE_DBS
+  DISCOUNT: 58.86
+  DISRT: 35
+  ITEM: 411550
+  ORDQTY: 75
+  ORDPOL: 150
+  field20: 14
+  ORDLP: 337800
+  ORDNET: 337800
+  SALMON: ""
+  SALQTY: 0
+  SALPOL: 0
+  SALLP: 0
+  SALNET: 0
+  Inv: {' Date': 00/00/00}
+  LP: 4504
+  Rate_policy: 1170
+  Policy_Amt: 337800
+  Scheme_Amt: 337800
   Schemeflag: Y
   Mechcacc: N
   Type: 'DB''S'

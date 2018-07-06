@@ -6,7 +6,8 @@ export class BizsolService extends Service {
         return [
             new Api("customer:list", this.customerList.bind(this)),
             new Api("item:list", this.itemList.bind(this)),
-            new Api("calculate:discount", this.calculateDiscount.bind(this))
+            new Api("calculate:discount", this.calculateDiscount.bind(this)),
+            new Api("enter:order", this.enterOrder.bind(this))
         ]
     }
 
@@ -21,5 +22,9 @@ export class BizsolService extends Service {
     async calculateDiscount(params:any) {
         return (await this.post('api/calculateDiscount', params));
     }
-    
+
+    async enterOrder(params:any) {
+        return (await this.post('api/enterOrder', params));
+    }
+
 }

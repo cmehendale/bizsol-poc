@@ -78,14 +78,22 @@ export function percentage(engine: any, data: InputData) {
 export function poles(engine: any, data: InputData) {
   return async (outcome: any, params: any) => {
       
-    const bonusOrderPoles = params.value * data.order.poles;
-    const bonusTotalPoles = params.value * data.sales.poles;
+    const bonusOrderPoles = Math.round(params.value * data.order.poles);
+    const bonusTotalPoles = Math.round(params.value * data.sales.poles);
 
     const p: any = await DB.PRODUCT.find(Product.ID_FIELD, params.key);
 
     if (p) {
       outcome.poles = bonusOrderPoles;
       outcome.totalPoles = bonusTotalPoles;
+      outcome.items = {
+        [params.key]: {
+          qty: bonusTotalPoles,
+          rate: p[Product.RATE_FIELD],
+          description: p[Product.DESC_FIELD],
+          code: p[Product.CODE_FIELD]
+        }
+      }
 
       const orderDiscount = Number(p[Product.RATE_FIELD]) * bonusOrderPoles;
       const totalDiscount = Number(p[Product.RATE_FIELD]) * bonusTotalPoles;

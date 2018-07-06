@@ -8,9 +8,10 @@ eligibility:
   conditions: 
     all:
     - fact: 'sales'
-      operator: 'greaterThanInclusive'
-      path: 'combo.193,235,237.poles'
-      value: 0
+      operator: 'comboSumGreaterThanInclusive'
+      path: 'family'
+      value: 
+        '193,235,237.poles': 0
     - any:
       - fact: 'order'
         path: 'families'
@@ -34,9 +35,10 @@ benefits:
       any:
       - all:
         - fact: 'sales'
-          path: 'combo.193,235,237.poles'
-          operator: 'lessThanInclusive'
-          value: 49
+          path: 'family'
+          operator: 'comboSumLessThanInclusive'
+          value: 
+            '193,235,237.poles': 49
         event:
           type: 'done'
           params:
@@ -46,13 +48,15 @@ benefits:
         
       - all:
         - fact: 'sales'
-          path: 'combo.193,235,237.poles'
-          operator: 'greaterThanInclusive'
-          value: 50
+          path: 'family'
+          operator: 'comboSumGreaterThanInclusive'
+          value: 
+            '193,235,237.poles': 50
         - fact: 'sales'
-          path: 'combo.193,235,237.poles'
-          operator: 'lessThanInclusive'
-          value: 200
+          path: 'family'
+          operator: 'comboSumLessThanInclusive'
+          value: 
+            '193,235,237.poles': 200
         event:
           type: 'done'
           params:
@@ -62,13 +66,15 @@ benefits:
 
       - all:
         - fact: 'sales'
-          path: 'combo.193,235,237.poles'
-          operator: 'greaterThanInclusive'
-          value: 201
+          path: 'family'
+          operator: 'comboSumGreaterThanInclusive'
+          value: 
+            '193,235,237.poles': 201
         - fact: 'sales'
-          path: 'combo.193,235,237.poles'
-          operator: 'lessThanInclusive'
-          value: 500
+          path: 'family'
+          operator: 'comboSumLessThanInclusive'
+          value: 
+            '193,235,237.poles': 500
         event:
           type: 'done'
           params:
@@ -78,13 +84,15 @@ benefits:
 
       - all:
         - fact: 'sales'
-          path: 'combo.193,235,237.poles'
-          operator: 'greaterThanInclusive'
-          value: 501
+          path: 'family'
+          operator: 'comboSumGreaterThanInclusive'
+          value: 
+            '193,235,237.poles': 501
         - fact: 'sales'
-          path: 'combo.193,235,237.poles'
-          operator: 'lessThanInclusive'
-          value: 1000
+          path: 'family'
+          operator: 'comboSumLessThanInclusive'
+          value: 
+            '193,235,237.poles': 1000
         event:
           type: 'done'
           params:
@@ -94,13 +102,15 @@ benefits:
 
       - all:
         - fact: 'sales'
-          path: 'combo.193,235,237.poles'
-          operator: 'greaterThanInclusive'
-          value: 1001
+          path: 'family'
+          operator: 'comboSumGreaterThanInclusive'
+          value: 
+            '193,235,237.poles': 1001
         - fact: 'sales'
-          path: 'combo.193,235,237.poles'
-          operator: 'lessThanInclusive'
-          value: 1800
+          path: 'family'
+          operator: 'comboSumLessThanInclusive'
+          value: 
+            '193,235,237.poles': 1800
         event:
           type: 'done'
           params:
@@ -109,9 +119,10 @@ benefits:
             value: 15
 
       - fact: 'sales'
-        path: 'combo.193,235,237.poles'
-        operator: 'greaterThanInclusive'
-        value: 1801
+        path: 'family'
+        operator: 'comboSumGreaterThanInclusive'
+        value: 
+          '193,235,237.poles': 1801
       event:
         type: 'done'
         params:

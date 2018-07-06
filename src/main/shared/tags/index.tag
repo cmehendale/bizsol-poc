@@ -19,7 +19,7 @@
 				</div>
 			</div>
 
-			<form class="form">
+			<form class="form" ref="inv_form">
 
 			<table class="table is-striped is-fullwidth">
 				<tr>
@@ -156,7 +156,10 @@
 						</tr>
 					</table>
 					</div>
+					<hr/>
+					<p class="button is-primary" onclick={onEnterOrder}> Enter Order </p>
 				</div>
+
 				</div>
 			</div>
 			</div>
@@ -271,6 +274,22 @@
 				this.update()
 			})
 	}
+
+	onEnterOrder() {
+		this.app.data("enter:order", {customer: this.customer, orderList: this.orderList, outcome:this.outcome})
+			.then(()=> {
+				this.customer = {}
+				this.orderList = []
+				this.orderItem = {}
+				this.schemes = undefined
+				this.discount = 0
+				this.refs.inv_form.reset()
+				this.update()
+				this.fetchCustomerList()
+				this.fetchItemList()
+			})
+	}
+
 
 	this.on('mount', this.onMount.bind(this)) 
 

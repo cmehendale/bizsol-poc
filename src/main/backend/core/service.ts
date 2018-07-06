@@ -35,6 +35,7 @@ export class BizsolService extends BaseService2 {
 		this.app.get('/api/customerList', this.wrap('/api/customerList', this.customerList.bind(this)))
 		this.app.get('/api/itemList',        this.wrap('/api/itemList',        this.itemList.bind(this)))
 		this.app.post('/api/calculateDiscount',        this.wrap('/api/calculateDiscount',        this.calculateDiscount.bind(this)))
+		this.app.post('/api/enterOrder',        this.wrap('/api/enterOrder',        this.enterOrder.bind(this)))
     }
 
     async bootstrap():Promise<Service2> {
@@ -84,6 +85,41 @@ export class BizsolService extends BaseService2 {
 
     async calculateDiscount(req: E.Request, res: E.Response): Promise<any> {
         return await new RuleEngine().execute(req.body.customer, req.body.orderList.map((item:any) => new OrderItem(item)))
+	}
+
+    async enterOrder(req: E.Request, res: E.Response): Promise<any> {
+        const customer = req.body.customer
+        const orderList = req.body.orderList
+        const outcome = req.body.outcome
+
+        const discountPer = (outcome.discount.value || 0) / orderList.length 
+
+        let orderItems = orderList.map((o: any) => {
+            return Object.assign({}, o, {
+                TERRN: customer.TERRN,
+                DZCTTX: customer.DZCTTX,
+                ALBYCD: customer.ALBYCD,
+                ALBKCD: customer.ALBKCD,
+                HOUSE: customer.DLA7TX,
+                ALCANB: customer[Customer.ID_FIELD],
+                ALCLTX: customer[Customer.NAME_FIELD],
+                ALCPTX: customer.ALCPTX,
+                CUPPB: customer.CUPPB,
+                TRNPBK: customer.CUPPB,
+                FLCVNB: '',
+                TAX_SUF: '12/03/18',
+                ORDDT2: 905,
+                ORDREF: 'F01-TRAVELEX',
+                Inv: {' Date': '00/00/00'},
+                Family: o[OrderItem.FAMILY_FIELD],
+                [OrderItem.NET_FIELD]: (o[OrderItem.TOTAL_FIELD] - discountPer)
+            })
+        })
+
+        await DB.ORDER_ITEM.add_all(orderItems)
+        return { success: true }
+
+        // return await new RuleEngine().execute(req.body.customer, req.body.orderList.map((item:any) => new OrderItem(item)))
 	}
     
 }

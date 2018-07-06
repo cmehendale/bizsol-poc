@@ -22,7 +22,11 @@ export class Bootstrap {
 
 	addFamily(data:any[], prodmap:any) {
 		return data.map((d:any) => {
-			d[OrderItem.FAMILY_FIELD] = prodmap[d[OrderItem.CODE_FIELD]][Product.FAMILY_FIELD]
+			try {
+				d[OrderItem.FAMILY_FIELD] = (prodmap[d[OrderItem.CODE_FIELD]] || {})[Product.FAMILY_FIELD] || ''
+			} catch (a) {
+				console.log('Error in addFamily', a)
+			}
 			return d
 		})
 	}

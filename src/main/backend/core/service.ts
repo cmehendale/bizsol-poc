@@ -1,5 +1,6 @@
-import {BaseService2, Service2, Config, Util, express as E} from '@819/service-ts/dist/backend'
+import {BaseService2, Service2} from './service2'
 import * as path from 'path'
+import * as E from 'express'
 
 // import {customerDB} from '../model/customers'
 // import {schemeDB} from '../model/schemes'
@@ -10,6 +11,7 @@ import DB from 'backend/model/db'
 
 import OrderItem from 'backend/model/db/order-item';
 import Customer from 'backend/model/db/customer';
+import { Config, Util } from 'backend/util';
 
 export class BizsolService extends BaseService2 {
 
@@ -53,19 +55,19 @@ export class BizsolService extends BaseService2 {
                 salesData.reduce(
                     (data:any , oi:any): any => {
                     if (String(oi[OrderItem.CUST_FIELD]) == String(dd[Customer.ID_FIELD])) {
-                        
-                        const sale  = Number(oi[OrderItem.TOTAL_FIELD]) //Number(oi[OrderItem.QTY_FIELD]) * Number(oi[OrderItem.RATE_FIELD])
+
+                        const sale  = Number(oi[OrderItem.TOTAL_FIELD])
                         const poles = Number(oi[OrderItem.POLES_FIELD])
                         const discount = oi[OrderItem.NET_FIELD] ? (sale - Number(oi[OrderItem.NET_FIELD] || '0')): 0
-                        data.sale     += sale //(oi[OrderItem.QTY_FIELD] * oi[OrderItem.RATE_FIELD])
+                        data.sale     += sale
                         data.poles    += poles
                         data.discount += discount
 
                         data.families = [ ...(data.families
                                                   .filter((f:any) => f != oi[OrderItem.FAMILY_FIELD])),
                                             oi[OrderItem.FAMILY_FIELD]
-                                        ]                                        
-                    }                    
+                                        ]
+                    }
                     //if (data.families.length > 0) console.log("FAMILY", dd.ALCLTX, data.families)
                     return data
                 }, {sale:0, poles:0, discount:0, families:[]})
@@ -80,7 +82,9 @@ export class BizsolService extends BaseService2 {
 
     async itemList(req: E.Request, res: E.Response): Promise<any> {
 		// return [{id:1, name:'6A Switch SP One Way', rate:100}, {id:2, name:'6/16 A Socket 3 PIN', rate:150}]
-        return await DB.PRODUCT.find_all()
+        const items = await DB.PRODUCT.find_all()
+				console.log(items.find((ii:any) => ii.JBADR0 == 199))
+				return items
 	}
 
     async calculateDiscount(req: E.Request, res: E.Response): Promise<any> {
@@ -92,7 +96,8 @@ export class BizsolService extends BaseService2 {
         const orderList = req.body.orderList
         const outcome = req.body.outcome
 
-        const discountPer = (outcome.discount.value || 0) / orderList.length 
+        let discountPer = (outcome.discount.value || 0) / orderList.length
+        if (discountPer < 0) { discountPer = 0 }
 
         let orderItems = orderList.map((o: any) => {
             return Object.assign({}, o, {
@@ -107,7 +112,7 @@ export class BizsolService extends BaseService2 {
                 CUPPB: customer.CUPPB,
                 TRNPBK: customer.CUPPB,
                 FLCVNB: '',
-                TAX_SUF: '12/03/18',
+                TAX_SUF: o.TAX_SUF, //'12/03/18',
                 ORDDT2: 905,
                 ORDREF: 'F01-TRAVELEX',
                 Inv: {' Date': '00/00/00'},
@@ -121,5 +126,5 @@ export class BizsolService extends BaseService2 {
 
         // return await new RuleEngine().execute(req.body.customer, req.body.orderList.map((item:any) => new OrderItem(item)))
 	}
-    
+
 }

@@ -2,17 +2,19 @@
 import Model from './model'
 
 export default class Scheme extends Model {
-    
+
     static ID_FIELD = 'id'
 
     id:any
     eligibility: any
     benefits: any
+    residue: any
     slab:any
     type:any
 
     static newInstance(obj?:any) {
-        return new Scheme(obj)           
+        return new Scheme(obj)
     }
-    
+
+
 }

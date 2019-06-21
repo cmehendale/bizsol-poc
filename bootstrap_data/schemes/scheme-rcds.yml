@@ -1,16 +1,16 @@
 
-id: 'RCDs' 
+id: 'RCDs'
 name: 'Take Off With RCDs'
-start: '01/03/2018' 
+start: '01/03/2018'
 end: '01/05/2018'
 
-eligibility:  
-  conditions: 
+eligibility:
+  conditions:
     all:
     - fact: 'sales'
       operator: 'comboSumGreaterThanInclusive'
       path: 'family'
-      value: 
+      value:
         '193,235,237.poles': 0
     - any:
       - fact: 'order'
@@ -27,7 +27,7 @@ eligibility:
         value: '237'
   event:
     type: 'done'
-    params: 
+    params:
       id: 'RCDs'
 
 benefits:
@@ -37,97 +37,103 @@ benefits:
         - fact: 'sales'
           path: 'family'
           operator: 'comboSumLessThanInclusive'
-          value: 
+          value:
             '193,235,237.poles': 49
         event:
           type: 'done'
           params:
             id: 'RCDs'
             handler: 'percentage'
+            key: '193,235,237.total'
             value: 0
-        
+
       - all:
         - fact: 'sales'
           path: 'family'
           operator: 'comboSumGreaterThanInclusive'
-          value: 
+          value:
             '193,235,237.poles': 50
         - fact: 'sales'
           path: 'family'
           operator: 'comboSumLessThanInclusive'
-          value: 
+          value:
             '193,235,237.poles': 200
         event:
           type: 'done'
           params:
             id: 'RCDs'
             handler: 'percentage'
+            key: '193,235,237.total'
             value: 7
 
       - all:
         - fact: 'sales'
           path: 'family'
           operator: 'comboSumGreaterThanInclusive'
-          value: 
+          value:
             '193,235,237.poles': 201
         - fact: 'sales'
           path: 'family'
           operator: 'comboSumLessThanInclusive'
-          value: 
+          value:
             '193,235,237.poles': 500
         event:
           type: 'done'
           params:
             id: 'RCDs'
             handler: 'percentage'
+            key: '193,235,237.total'
             value: 9
 
       - all:
         - fact: 'sales'
           path: 'family'
           operator: 'comboSumGreaterThanInclusive'
-          value: 
+          value:
             '193,235,237.poles': 501
         - fact: 'sales'
           path: 'family'
           operator: 'comboSumLessThanInclusive'
-          value: 
+          value:
             '193,235,237.poles': 1000
         event:
           type: 'done'
           params:
             id: 'RCDs'
             handler: 'percentage'
+            key: '193,235,237.total'
             value: 12
 
       - all:
         - fact: 'sales'
           path: 'family'
           operator: 'comboSumGreaterThanInclusive'
-          value: 
+          value:
             '193,235,237.poles': 1001
         - fact: 'sales'
           path: 'family'
           operator: 'comboSumLessThanInclusive'
-          value: 
+          value:
             '193,235,237.poles': 1800
         event:
           type: 'done'
           params:
             id: 'RCDs'
             handler: 'percentage'
+            key: '193,235,237.total'
             value: 15
 
       - fact: 'sales'
         path: 'family'
         operator: 'comboSumGreaterThanInclusive'
-        value: 
+        value:
           '193,235,237.poles': 1801
       event:
         type: 'done'
         params:
           id: 'RCDs'
           handler: 'percentage'
+          key: '193,235,237.total'
           value: 18
 
     event:

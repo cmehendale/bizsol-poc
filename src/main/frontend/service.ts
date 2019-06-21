@@ -1,6 +1,6 @@
-import {Service, Api} from '@819/service-ts/dist/frontend'
+import {Service, Api} from './base-service'
 
-export class BizsolService extends Service { 
+export class BizsolService extends Service {
 
     initApis():Api[] {
         return [

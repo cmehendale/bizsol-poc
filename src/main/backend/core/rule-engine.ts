@@ -1,8 +1,10 @@
 import Engine from "../model/json-rules";
-import { strategies } from "../model/strategies";
-import { actions } from "../model/actions";
+import {comboSum} from '../model/json-rules/util'
 
-import { moment } from "@819/service-ts";
+// import { strategies } from "../model/strategies";
+// import { actions } from "../model/actions";
+
+//import {moment } from "moment";
 
 import DB from "../model/db";
 import Scheme from "../model/db/scheme";
@@ -15,6 +17,8 @@ import Customer from "backend/model/db/customer";
 
 import * as handlers from "./scheme-handlers";
 import { matchedCondition, safeFact } from "backend/core/event-util";
+// import { schemeDB } from "backend/model/schemes";
+
 
 enum EVENTS {
   EMIT = "emit",
@@ -42,7 +46,7 @@ export class RuleEngine {
     }, {});
 
     const engine = Engine();
-    const rules: Promise<any>[] = schemeList.map(s => 
+    const rules: Promise<any>[] = schemeList.map(s =>
       engine.addRule(s.eligibility)
     );
     await Promise.all(rules);
@@ -72,6 +76,33 @@ export class RuleEngine {
       };
     };
 
+    // const residueObj = (data:any, item:any) => {
+    //   if (!data) return data
+
+    //   data.total = (data.total || 0) - item.total
+    //   data.poles = (item.poles || 0) - item.poles
+    //   data.qty   = (item.qty   || 0) - item.qty
+
+    //   return data
+    // }
+
+    // const calculateResidue = (residue: any, condition: any) => {
+    //   const item  = {
+    //     value : (condition.value || 0),
+    //     poles : (condition.poles || 0),
+    //     qty   : (condition.qty   || 0)
+    //   }
+
+    //   residue = residueObj(residue, item)
+    //   residue.family
+    //   // residue.total = (residue.total || 0) - value
+    //   // residue.poles = (residue.poles || 0) - poles
+    //   // residue.qty   = (residue.qty || 0)   - qty
+
+
+
+    // }
+
     const onContinue = (engine: any, data: InputData) => {
       return async (params: any, almanac: any, result: any) => {
         const outcome: any = await safeFact(almanac, FACTS.OUTCOME, {});
@@ -83,9 +114,9 @@ export class RuleEngine {
         };
 
         const residue: any = await safeFact(almanac, FACTS.RESIDUE, {})
-        residue.total = (residue.total || 0) - (params.condition.value || 0)
-        residue.poles = (residue.poles || 0) - (params.condition.poles || 0)
-        residue.qty   = (residue.qty || 0)   - (params.condition.qty   || 0)
+        residue.total = (residue.total || 0) - params.condition.value
+        residue.poles = (residue.poles || 0) - params.condition.poles
+        residue.qty   = (residue.qty || 0)   - params.condition.qty
 
         setTimeout(async () => {
           engine.addFact(FACTS.OUTCOME, outcome)
@@ -108,7 +139,7 @@ export class RuleEngine {
 
           if (handler)
             outcome = await handler(engine, data)(outcome, params);
-          
+
           const scheme: any = await DB.SCHEME.find(Scheme.ID_FIELD, params.id)
           scheme.outcome = outcome
           resolve(scheme);
@@ -117,6 +148,21 @@ export class RuleEngine {
         }
       };
     };
+
+    const initResidue = (scheme: Scheme, data:InputData) => {
+      const residue = Object.assign({}, data.sales)
+      if (scheme.residue) {
+        const fact   = scheme.residue.fact
+        const path   = scheme.residue.path
+        const value  = scheme.residue.value
+
+        const keys = Object.keys(value || {});
+        for (let ii = 0; ii < keys.length; ii++) {
+          (residue as any)[keys[ii]] = comboSum(((data as any)[fact] || {})[path], value[keys[ii]])
+        }
+      }
+      return residue
+    }
 
     const calcBenefits = async (scheme: Scheme): Promise<any> => {
       const engine = Engine();
@@ -129,7 +175,7 @@ export class RuleEngine {
       return new Promise((resolve, reject) => {
         engine.on(EVENTS.DONE, onDone(engine, data, resolve, reject));
         engine.addFact(FACTS.OUTCOME, {});
-        engine.addFact(FACTS.RESIDUE, Object.assign({}, data.sales))
+        engine.addFact(FACTS.RESIDUE, initResidue(scheme, data)) //Object.assign({}, data.sales))
         engine.run(data);
       });
     };
@@ -149,7 +195,8 @@ export class RuleEngine {
 
   async execute(customer: Customer, orderItems: OrderItem[]) {
     const inputData = await this.createInputData(customer, orderItems);
-    console.log("Input", inputData.sales, inputData.order);
+    console.log("Sales", inputData.sales)
+    console.log("Order", inputData.order)
 
     const eligibleSchemes = await this.findEligibleSchemes(inputData);
     console.log("Eligible", eligibleSchemes);

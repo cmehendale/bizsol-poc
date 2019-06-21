@@ -1,16 +1,23 @@
-
-id: 'F-04' 
+id: 'F-04'
 name: 'Travel Exotica for AS'
-start: '01/03/2018' 
+start: '01/03/2018'
 end: '01/05/2018'
+residue:
+  fact: 'sales'
+  path: 'family'
+  value:
+    total: '5210,5211.total'
+    poles: '5210,5211.poles'
+    qty: '5210,5211.qty'
 
-eligibility:  
-  conditions: 
+eligibility:
+  conditions:
     all:
     - fact: 'sales'
-      operator: 'greaterThanInclusive'
-      path: 'total'
-      value: 66000
+      operator: 'comboSumGreaterThanInclusive'
+      path: 'family'
+      value:
+        '5210,5211.total': 66000
     - any:
       - fact: 'order'
         path: 'families'
@@ -22,7 +29,7 @@ eligibility:
         value: '5211'
   event:
     type: 'done'
-    params: 
+    params:
       id: 'F-04'
 
 benefits:
@@ -41,11 +48,16 @@ benefits:
           type: 'done'
           params:
             handler: 'freebies'
-            keys: ['675501']
+            keys: #['675501']
+              675501 :
+                fact: 'sales'
+                path: 'family'
+                value:
+                  discount: '5210,5211.discount'
             id: 'F-04'
 
       - fact: 'residue'
-        path: 'total'        
+        path: 'total'
         operator: 'greaterThanInclusive'
         value: 3750000
         event:
@@ -55,8 +67,8 @@ benefits:
             value: 4500
             count: 1
 
-      - fact: 'residue'        
-        path: 'total'        
+      - fact: 'residue'
+        path: 'total'
         operator: 'greaterThanInclusive'
         value: 2750000
         event:
@@ -65,8 +77,8 @@ benefits:
             id: 675501
             value: 3250
 
-      - fact: 'residue'        
-        path: 'total'        
+      - fact: 'residue'
+        path: 'total'
         operator: 'greaterThanInclusive'
         value: 2150000
         event:
@@ -75,8 +87,8 @@ benefits:
             id: 675501
             value: 2450
 
-      - fact: 'residue'        
-        path: 'total'        
+      - fact: 'residue'
+        path: 'total'
         operator: 'greaterThanInclusive'
         value: 1530000
         event:
@@ -85,8 +97,8 @@ benefits:
             id: 675501
             value: 1700
 
-      - fact: 'residue'        
-        path: 'total'        
+      - fact: 'residue'
+        path: 'total'
         operator: 'greaterThanInclusive'
         value: 495000
         event:
@@ -94,9 +106,9 @@ benefits:
           params:
             id: 675501
             value: 430
-          
-      - fact: 'residue'        
-        path: 'total'        
+
+      - fact: 'residue'
+        path: 'total'
         operator: 'greaterThanInclusive'
         value: 170000
         event:
@@ -105,8 +117,8 @@ benefits:
             id: 675501
             value: 125
 
-      - fact: 'residue'        
-        path: 'total'        
+      - fact: 'residue'
+        path: 'total'
         operator: 'greaterThanInclusive'
         value: 66000
         event:

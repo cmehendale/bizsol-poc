@@ -1,4 +1,4 @@
-import {Application, riot} from '@819/service-ts/dist/frontend'
+import {Application, riot} from './base-app'
 
 import {BizsolService} from './service';
 

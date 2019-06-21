@@ -1,0 +1,14 @@
+html
+	head
+		link(rel='stylesheet', href='/www/css/bundle.css')
+		meta(name='viewport', content='width=device-width')
+
+		each m in meta
+			meta(name='#{m.name}', content='#{m.content}')
+
+body
+	div(id='view').
+		!{app}
+	script(src="/www/js/bundle.js")
+	script.
+		new Application(!{opts})

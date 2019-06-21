@@ -20,11 +20,12 @@
         "src/main/*",
         "src/test/*",
         "node_modules/*",
-        "node_modules/@819/service-ts/dist/*"
+        "node_modules/@819/service-ts/dist"
       ]
-    }
+		},
+		"typeRoots" : ["node_modules/@types"]
   },
   "exclude": [
     "gen", "dist", "node_modules"
-  ]  
+  ]
 }

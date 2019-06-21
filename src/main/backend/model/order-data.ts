@@ -1,6 +1,6 @@
 import Product from "./db/product";
 import OrderItem from "backend/model/db/order-item";
-import {moment} from '@819/service-ts'
+import * as moment from 'moment'
 
 export class InputData {
   constructor(public order: ItemData, public sales: ItemData, public meta: any = {}) {}
@@ -29,27 +29,27 @@ export async function createInputData(
 
     data.total    += Number(item[OrderItem.TOTAL_FIELD] || '0')
     data.qty      += Number(item[OrderItem.QTY_FIELD] || '0')
-    data.discount += item[OrderItem.NET_FIELD] ? (Number(item[OrderItem.TOTAL_FIELD] || '0') - Number(item[OrderItem.NET_FIELD] || '0')): 0 
+    data.discount += item[OrderItem.NET_FIELD] ? (Number(item[OrderItem.TOTAL_FIELD] || '0') - Number(item[OrderItem.NET_FIELD] || '0')): 0
     data. poles   += Number(item[OrderItem.POLES_FIELD] || '0')
-    
+
     return data
   }
 
   const powerset = (array: any[]) => {
     const results = [[]];
     for (const value of array) {
-      const copy = [...results]; 
+      const copy = [...results];
       for (const prefix of copy) {
         results.push(prefix.concat(value));
       }
     }
     return results;
-  };  
-  
+  };
+
   const reduceOrderItems = (label: string) => {
     return (data: ItemData, item: any): ItemData => {
-    
-    const value =  Number(item[OrderItem.RATE_FIELD] || '0') * Number(item[OrderItem.QTY_FIELD] || '0'); 
+
+    const value =  Number(item[OrderItem.RATE_FIELD] || '0') * Number(item[OrderItem.QTY_FIELD] || '0');
     const netval = Number(item[OrderItem.NET_FIELD] || '-1');
 
     data.total    += value;
@@ -64,15 +64,15 @@ export async function createInputData(
     data.family[fly] = updateDataObj(data.family[fly] || { total:0, discount:0, qty:0, poles: 0 }, item)
 
     //if (label == 'order') console.log("RED", data.family, item)
-
-    const MONTH =  moment(item[OrderItem.DATE_FIELD], 'DD/MM/YY').format('MMM')
+    const MONTH =  item[OrderItem.DATE_FIELD] ? moment(item[OrderItem.DATE_FIELD], 'DD/MM/YY').format('MMM'): 'All'
+    console.log("DATE", item[OrderItem.DATE_FIELD], MONTH)
     data.month[MONTH] = updateDataObj(data.month[MONTH] || { total:0, discount:0, qty:0, poles: 0 }, item)
 
     // console.log("Reducing", data)
     // console.log ('FAM', item[OrderItem.FAMILY_FIELD])
 
     return data;
-  } 
+  }
   };
 
   const postProcessForFamilyCombo = (data: ItemData): ItemData => {
@@ -83,7 +83,7 @@ export async function createInputData(
       const combo = pSet[ii]
       if (combo.length > 0) {
         const key = combo.join(',')
-        data.combo[key] = combo.reduce((obj, f)=> { 
+        data.combo[key] = combo.reduce((obj, f)=> {
           obj.total    += (data.family[f] || {}).total || 0
           obj.discount += (data.family[f] || {}).discount || 0
           obj.qty      += (data.family[f] || {}).qty || 0
@@ -98,7 +98,7 @@ export async function createInputData(
 
   const ip = new InputData(
     postProcessForFamilyCombo(orderItems.reduce(reduceOrderItems('order'), new ItemData())),
-    postProcessForFamilyCombo(salesItems.reduce(reduceOrderItems('sales'), new ItemData()))
+    postProcessForFamilyCombo([...salesItems, ...orderItems].reduce(reduceOrderItems('sales'), new ItemData()))
   );
 
   // console.log("Sales IP", ip.sales.families, ip.sales)

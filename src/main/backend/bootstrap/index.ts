@@ -12,12 +12,12 @@ import Product from 'backend/model/db/product';
 export class Bootstrap {
 
 	async initCustomers() {
-		let data = [ 
-		    ...YAML.load('./bootstrap_data/customer_data_1.yaml') 
+		let data = [
+		    ...YAML.load('./bootstrap_data/customer_data_1.yaml')
 		]
 		await DB.CUSTOMER.load(data)
 		console.log('CUSTOMERS', (await DB.CUSTOMER.find_all()).length)
-		
+
 	}
 
 	addFamily(data:any[], prodmap:any) {
@@ -38,29 +38,30 @@ export class Bootstrap {
 			pm[p.IDVAL] = p; return pm
 		}, {})
 
-		let data = [ 
+		let data = [
 			...YAML.load('./bootstrap_data/order_data.yaml'),
-			...YAML.load('./bootstrap_data/order_data_1.yaml')
+			...YAML.load('./bootstrap_data/order_data_1.yaml'),
+			...YAML.load('./bootstrap_data/order_data_2.yaml')
 		]
-		
+
 		data = this.addFamily(data, prodmap)
 		await DB.ORDER_ITEM.load(data)
-		
+
 		console.log('ORDER_ITEMS', (await DB.ORDER_ITEM.find_all()).length)
 	}
 
 	async initProducts() {
-		
-		let data  = [ 
+
+		let data  = [
 			...YAML.load('./bootstrap_data/product_data.yaml'),
-			...YAML.load('./bootstrap_data/product_data_1.yaml') 
+			...YAML.load('./bootstrap_data/product_data_1.yaml')
 		];
-		
-		await DB.PRODUCT.load(data)
-				
+
+		await DB.PRODUCT.load(data.filter(pp => (pp.NET || pp.PLIBP)))
+
 		console.log('PRODUCTS', (await DB.PRODUCT.find_all()).length)
 	}
-	
+
 	async initSchemes() {
 		// const s5 = YAML.load('./bootstrap_data/schemes/scheme-rcbs.yml');
 		// const s6 = YAML.load('./bootstrap_data/schemes/scheme-dbs.yml');
@@ -73,7 +74,7 @@ export class Bootstrap {
 			YAML.load('./bootstrap_data/schemes/scheme-dbs.yml')
 		])
 		console.log('SCHEMES', (await DB.SCHEME.find_all()).length)
-		
+
 	}
 
 	async bootstrap() {

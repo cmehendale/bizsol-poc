@@ -23,17 +23,17 @@
 
 			<table class="table is-striped is-fullwidth">
 				<tr>
-					<td width="50%" colspan="2"> 
+					<td width="50%" colspan="2">
 						<select class="select float-left" onchange={onCustomer} >
 							<option each={dd in customerList} value={dd.DECANB}> {dd.ALCLTX} </option>
-						<select> 
+						<select>
 					</td>
 					<td width="50%" colspan="4">
 						<table class="has-text-right table is-striped is-fullwidth">
 							<tr>
 								<td width="34%" class="has-text-right">
 									<span class="is-size-7 has-text-grey">Poles</span><br/>
- 									<span class="is-size-5">{customer.poles.toLocaleString('en-IN')}</span> 
+ 									<span class="is-size-5">{customer.poles.toLocaleString('en-IN')}</span>
 								</td>
 								<td width="33%" class="has-text-right">
 									<span class="is-size-7 has-text-grey">Sale</span><br/>
@@ -61,24 +61,24 @@
 					<td class="has-text-right"> {ORDQTY} </th>
 					<td class="has-text-right"> {LP} </th>
 					<td class="has-text-right"> {amount.toLocaleString('en-IN')} </th>
-					<td class="has-text-right"> <span class="button is-danger" onclick={onDelOrderItem} > Del </span> </td>			
+					<td class="has-text-right"> <span class="button is-danger" onclick={onDelOrderItem} > Del </span> </td>
 				</tr>
 				<tr>
-					<td colspan="2"> 
-						<select onchange={onItem} class="select" ref='type'> 
-							<option each={item in itemList} value={item.ITNBR}> ({item.JBADR0}) {item.ITDSC} </option>
-						</select> 
+					<td colspan="2">
+						<select onchange={onItem} class="select" ref='type'>
+							<option each={item in itemList} value={item.ITNBR}> {item.JBADR0} -- {item.ITDSC} </option>
+						</select>
 					</td>
 					<td class="has-text-right"> <input class="input" align="right" ref='qty' value={orderItem.value} /> </td>
 					<td class="has-text-right"> <input class="input" align="right" ref='rate' value='' /> </td>
 					<td class="has-text-right"> {(refs.qty.value * refs.rate.value).toLocaleString('en-IN')} </td>
 					<td class="has-text-right"> <span class="button is-primary" onclick={onAddOrderItem}> Add </span> </td>
 				</tr>
-				<tr> 
+				<tr>
 					<td colspan="6"/>
 				</tr>
 				<tr>
-					<td colspan="2"> 
+					<td colspan="2">
 						<span class="is-size-4"> Total </span>
 					</td>
 					<td class="has-text-right">  </td>
@@ -129,9 +129,22 @@
 								<ul if="{scheme.outcome.items}">
 									<li each="{key in Object.keys(scheme.outcome.items)}">
 										({scheme.outcome.items[key].code}) { scheme.outcome.items[key].description } <br/>
-										<span class="is-italic"> {scheme.outcome.items[key].qty} pcs (@ INR { scheme.outcome.items[key].rate }) </span>
+										<span class="is-italic"> {(scheme.outcome.items[key].qty || 0).toLocaleString('en-IN')} pcs (@ INR { scheme.outcome.items[key].rate }) </span>
 									</li>
 								</ul>
+                <p>
+                  <table class='table is-striped'>
+                    <tr>
+                      <td class="is-size-7"> Current Benefit </td>
+                      <th class="is-size-7 has-text-right"> {(scheme.outcome.discount.curr || 0).toLocaleString('en-IN')} </th>
+                    </tr>
+                    <tr>
+                      <td class="is-size-7"> Already Availed </td>
+                      <th class="is-size-7 has-text-right"> {(scheme.outcome.discount.past || 0).toLocaleString('en-IN')} </th>
+                    </tr>
+                  </table>
+
+                </p>
 							</td>
 							<td class="has-text-right">
 								{scheme.outcome.discount.value.toLocaleString('en-IN')}
@@ -151,7 +164,7 @@
 								<span class="is-size-5 has-text-info">{outcome.discount.value.toLocaleString('en-IN')}</span>
 							</th>
 							<th class="has-text-right">
-								<span class="is-size-5 has-text-info">{outcome.discount.percent.toLocaleString('en-IN')}%</span> 
+								<span class="is-size-5 has-text-info">{outcome.discount.percent.toLocaleString('en-IN')}%</span>
 							</th>
 						</tr>
 					</table>
@@ -183,7 +196,7 @@
 			return sum + o.amount
 		}, 0)
 	}
-	
+
 	getDiscountLabel(discount) {
 		return discount ? discount.meta.map((m)=> { return m.name }): ''
 	}
@@ -210,8 +223,8 @@
 
 	onItem(e) {
 		this.item = this.itemList.find((ii) => { return ii.ITNBR == e.target.value })
-		this.refs.rate.value = this.item.PLIBP
-		this.update() 
+		this.refs.rate.value = (this.item.NET || this.item.PLIBP)
+		this.update()
 	}
 
 	onDelOrderItem(e) {
@@ -239,22 +252,22 @@
 	}
 
 	fetchCustomerList() {
-		this.app.data('customer:list').then((list) => { 
+		this.app.data('customer:list').then((list) => {
 			console.log("DIST LIST = ", list);
-			this.customerList = list 
+			this.customerList = list
 			this.customer = list[0]
-			this.update(); 
+			this.update();
 		})
 	}
 
 	fetchItemList() {
-		this.app.data('item:list').then((list) => { 
+		this.app.data('item:list').then((list) => {
 			console.log("ITEM LIST = ", list);
-			this.itemList = list; 
+			this.itemList = list;
 			this.item = this.itemList[0]
 			if (this.refs.rate)
-				this.refs.rate.value = this.item.PLIBP 
-			this.update(); 
+				this.refs.rate.value = (this.item.NET || this.item.PLIBP)
+			this.update();
 		})
 	}
 
@@ -291,7 +304,7 @@
 	}
 
 
-	this.on('mount', this.onMount.bind(this)) 
+	this.on('mount', this.onMount.bind(this))
 
 </script>
 

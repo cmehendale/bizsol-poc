@@ -24,7 +24,7 @@
                     <td> {item.JBADR0} </td>
                     <td> {item.ITDSC} </td>
                     <td> {item.NUMPOL || 'NA'} </td>
-                    <td> {(item.PLIBP || '0').toLocaleString('en-IN')} </td>
+                    <td> {(item.NET || item.PLIBP || '0').toLocaleString('en-IN')} </td>
                 </tr>
             </table>
         </div>
@@ -59,19 +59,18 @@
     this.passesFilter = function(item) {
         if (!this.fltr || this.fltr.trim().length <= 0) return true
 
-        var ok =  String((item.ITNBR  || '')).toLowerCase().match(this.fltr.toLowerCase()) || 
-                  String((item.JBADR0 || '')).toLowerCase().match(this.fltr.toLowerCase()) ||
+        var ok =  String((item.ITNBR  || 0) + '').toLowerCase().match(this.fltr.toLowerCase()) ||
+                  String((item.JBADR0 || 0) + '').toLowerCase().match(this.fltr.toLowerCase()) ||
                   String((item.ITDSC  || '')).toLowerCase().match(this.fltr.toLowerCase()) ||
-                  item.NUMPOL >= Number(this.fltr || '0') ||
-                  item.PLIBP  >= Number(this.fltr || '0')
-        
+                  item.NUMPOL >= Number(this.fltr || '0')
+
         return ok
     }
 
     this.onMount = function() {
         if (!opts.app) return
         this.itemList = opts.itemList
-        opts.app.on('itemList:modal', () => { 
+        opts.app.on('itemList:modal', () => {
             this.show = true
             this.update()
         })

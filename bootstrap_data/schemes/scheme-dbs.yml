@@ -1,11 +1,11 @@
 
-id: 'DBs' 
+id: 'DBs'
 name: 'Take Off With DBs'
-start: '01/03/2018' 
+start: '01/03/2018'
 end: '01/05/2018'
 
-eligibility:  
-  conditions: 
+eligibility:
+  conditions:
     all:
     - fact: 'sales'
       operator: 'greaterThanInclusive'
@@ -38,7 +38,7 @@ eligibility:
         value: '7022'
   event:
     type: 'done'
-    params: 
+    params:
       id: 'DBs'
 
 benefits:
@@ -54,8 +54,9 @@ benefits:
           params:
             id: 'DBs'
             handler: 'percentage'
+            key: '7001,7002,7016,7018,7021,7022.total'
             value: 0
-        
+
       - all:
         - fact: 'sales'
           path: 'total'
@@ -70,6 +71,7 @@ benefits:
           params:
             id: 'DBs'
             handler: 'percentage'
+            key: '7001,7002,7016,7018,7021,7022.total'
             value: 7.5
 
       - all:
@@ -86,6 +88,7 @@ benefits:
           params:
             id: 'DBs'
             handler: 'percentage'
+            key: '7001,7002,7016,7018,7021,7022.total'
             value: 11
 
       - all:
@@ -102,6 +105,7 @@ benefits:
           params:
             id: 'DBs'
             handler: 'percentage'
+            key: '7001,7002,7016,7018,7021,7022.total'
             value: 14
 
       - all:
@@ -118,6 +122,7 @@ benefits:
           params:
             id: 'DBs'
             handler: 'percentage'
+            key: '7001,7002,7016,7018,7021,7022.total'
             value: 16
 
       - fact: 'sales'
@@ -129,6 +134,7 @@ benefits:
         params:
           id: 'DBs'
           handler: 'percentage'
+          key: '7001,7002,7016,7018,7021,7022.total'
           value: 19
 
     event:

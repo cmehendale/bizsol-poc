@@ -37,7 +37,7 @@
     "jsonwebtoken": "^8.2.0",
     "lodash": "^4.17.10",
     "lowdb": "^1.0.0",
-    "minimist": "^1.2.0",
+    "minimist": "^1.2.2",
     "moment": "^2.22.0",
     "page": "^1.8.6",
     "pug": "^2.0.3",
